@@ -92,6 +92,39 @@ Hashes cache in your platform's app-data directory so re-scans skip already-anal
 - Windows: `%APPDATA%/Peanut/`
 - Linux: `~/.local/share/peanut/` (or `~/.peanut/` when running from source)
 
+## Troubleshooting
+
+### macOS: "Apple could not verify Peanut is free of malware"
+
+Peanut is not yet code-signed (Apple Developer enrollment is in progress), so macOS Gatekeeper blocks it on first launch.
+
+To open it the first time:
+
+1. Click **Done** on the warning dialog. Do not click Move to Trash, that deletes the app.
+2. Open **System Settings → Privacy & Security**.
+3. Scroll down to the Security section.
+4. Click **Open Anyway** next to the message about Peanut being blocked.
+5. Authenticate with Touch ID or your password.
+
+After this once, macOS remembers Peanut as approved and it launches normally going forward.
+
+Alternative: right-click `Peanut.app` in Finder, choose **Open**, and click **Open** in the dialog that appears.
+
+### Windows: SmartScreen warning
+
+Windows Defender SmartScreen warns that Peanut is from an unrecognized publisher. Click **More info** on the warning, then **Run anyway**.
+
+### Linux: AppImage will not launch
+
+Make the AppImage executable first:
+
+```bash
+chmod +x Peanut-1.0.0-x86_64.AppImage
+./Peanut-1.0.0-x86_64.AppImage
+```
+
+If it still fails, install FUSE: `sudo apt install libfuse2` on Ubuntu 22 or later.
+
 ## Building from source
 
 See [BUILD.md](BUILD.md) for cross-platform packaging instructions (macOS `.app`, Windows installer, Linux AppImage).
@@ -123,10 +156,6 @@ See [LICENSE](LICENSE) for full terms.
 
 ## License
 
-Peanut is released under the MIT License. You can use, modify, and distribute
-it freely, including for commercial purposes. See [LICENSE](LICENSE) for the
-full text.
-
-## Author
+Peanut is released under the MIT License. You can use, modify, and distribute it freely, including for commercial purposes. See [LICENSE](LICENSE) for the full text.
 
 Built by [Cody Browne](https://github.com/cbrwe) · [cbrwe@proton.me](mailto:cbrwe@proton.me)
