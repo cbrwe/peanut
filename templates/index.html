@@ -1,0 +1,3098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peanut</title>
+<link rel="icon" type="image/svg+xml" href="/static/logo.svg">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:       #F4F4F2;
+  --white:    #FFFFFF;
+  --muted:    #EBEBEA;
+  --deep:     #E0E0DE;
+  --border:   #D8D8D5;
+  --border-h: #C2C2BE;
+  --text:     #0A0A0A;
+  --text-2:   #4A4A48;
+  --text-3:   #8A8A87;
+  --black:    #0A0A0A;
+  --gold:     #0A0A0A;
+  --gold-bg:  rgba(10,10,10,0.04);
+  --gold-bdr: rgba(10,10,10,0.12);
+  --keep:     #1B8C5A;
+  --keep-bg:  rgba(27,140,90,0.05);
+  --keep-bdr: rgba(27,140,90,0.18);
+  --del:      #CC0A0A;
+  --del-bg:   rgba(204,10,10,0.04);
+  --del-bdr:  rgba(204,10,10,0.15);
+  --teal:     #2A7A8A;
+  --teal-bg:  rgba(42,122,138,0.06);
+  --amber:    #7A6A2A;
+  --amber-bg: rgba(122,106,42,0.05);
+  --lossless: #2D9B6A;
+  --lossy:    #B06820;
+  --r:        3px;
+  --r-md:     6px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow:    0 2px 8px rgba(0,0,0,0.06), 0 0 1px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.03);
+  --gloss:     0 1px 0 rgba(255,255,255,0.7) inset, 0 1px 3px rgba(0,0,0,0.06);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background: linear-gradient(180deg, #F6F6F4 0%, #F2F2F0 100%);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+::selection { background: var(--black); color: #fff; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-h); border-radius: 3px; }
+
+/* ── KEYFRAMES ─────────────────────────────────────────── */
+@keyframes rise { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes grow { from { transform:scale(0.97); opacity:0; } to { transform:scale(1); opacity:1; } }
+
+/* ── TOPBAR ────────────────────────────────────────────── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 52px;
+  background: linear-gradient(180deg, #0F0F0F 0%, #0A0A0A 100%);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+}
+
+.topbar-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 21px;
+  font-weight: 400;
+  color: #F4F4F2;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.topbar-brand img {
+  height: 28px;
+  width: auto;
+  flex-shrink: 0;
+  filter: brightness(0) invert(1);
+}
+
+.topbar-stats {
+  display: flex; gap: 32px; align-items: center;
+}
+
+.topbar-stat { text-align: center; }
+
+.topbar-stat-v {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500; font-size: 14px;
+  line-height: 1; color: #F4F4F2;
+}
+
+.topbar-stat-v.gold { color: #F4F4F2; }
+.topbar-stat-v.green { color: #4ADE80; }
+
+.topbar-stat-l {
+  font-size: 10px; font-weight: 500;
+  color: rgba(244,244,242,0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-top: 3px;
+}
+
+.topbar-keys {
+  display: flex; gap: 5px; align-items: center;
+}
+
+.kbd {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; font-weight: 500;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: rgba(244,244,242,0.5);
+}
+/* Clickable kbd variant — same look but interactive. */
+.kbd-btn {
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.kbd-btn:hover {
+  background: rgba(255,255,255,0.18);
+  color: rgba(244,244,242,0.95);
+  border-color: rgba(255,255,255,0.25);
+}
+
+/* ── ACTION LOG PANEL ────────────────────────────────────
+   Slides up from the bottom of the viewport like a developer
+   console. Persistent record of every meaningful action. */
+.log-overlay {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: 60vh;
+  max-height: 600px;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.12);
+  z-index: 9000;
+  display: flex; flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.log-overlay.open { transform: translateY(0); }
+.log-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--muted);
+  flex-shrink: 0;
+}
+.log-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: 18px;
+  color: var(--text);
+  flex: 1;
+}
+.log-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-2);
+}
+.log-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+.log-entry {
+  display: grid;
+  grid-template-columns: 80px 24px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 8px 20px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.log-entry:hover { background: rgba(0,0,0,0.02); }
+.log-ts {
+  color: var(--text-3);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.log-icon {
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.4;
+}
+.log-msg {
+  color: var(--text);
+  word-break: break-word;
+}
+.log-msg .log-path {
+  color: var(--text-2);
+  font-size: 11px;
+  display: block;
+  margin-top: 2px;
+}
+.log-entry.lvl-success .log-icon { color: var(--keep); }
+.log-entry.lvl-warn    .log-icon { color: #b06820; }
+.log-entry.lvl-error   .log-icon { color: #CC0A0A; }
+.log-entry.lvl-info    .log-icon { color: var(--text-3); }
+.log-entry.act-scan_started, .log-entry.act-scan_complete,
+.log-entry.act-scan_failed   { background: rgba(0,0,0,0.015); }
+.log-entry.act-scan_started .log-msg, .log-entry.act-scan_complete .log-msg,
+.log-entry.act-scan_failed .log-msg { color: var(--text-2); font-style: italic; }
+.log-empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-3);
+  font-style: italic;
+}
+
+/* ── BUTTONS ───────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 500; font-size: 13px;
+  padding: 9px 20px;
+  border-radius: var(--r);
+  border: none; cursor: pointer;
+  transition: all 0.18s ease;
+  text-decoration: none;
+  letter-spacing: 0.1px;
+}
+
+.btn:active { transform: scale(0.97); transition-duration: 0.06s; }
+
+.btn-dark {
+  background: linear-gradient(180deg, #1A1A1A 0%, #0A0A0A 100%);
+  color: #F4F4F2;
+  box-shadow: var(--gloss);
+}
+.btn-dark:hover { background: linear-gradient(180deg, #2A2A2A 0%, #151515 100%); }
+.btn-dark:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+.btn-outline {
+  background: var(--white);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: var(--gloss);
+}
+.btn-outline:hover { border-color: var(--border-h); background: var(--muted); }
+
+.btn-danger {
+  background: rgba(204,10,10,0.06);
+  color: #CC0A0A;
+  border: 1px solid rgba(204,10,10,0.18);
+}
+.btn-danger:hover { background: rgba(204,10,10,0.1); }
+
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+
+/* ── LANDING ───────────────────────────────────────────── */
+.landing {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 80px 32px;
+}
+
+.landing-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-3);
+  margin-bottom: 16px;
+  animation: rise 0.6s ease both;
+}
+
+.landing-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(36px, 5vw, 56px);
+  letter-spacing: -0.3px;
+  line-height: 1.1;
+  text-align: center;
+  margin-bottom: 14px;
+  color: var(--text);
+  animation: rise 0.6s ease both;
+  animation-delay: 0.06s;
+}
+
+.landing-title em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--text);
+}
+
+.landing-sub {
+  font-size: 15px;
+  color: var(--text-2);
+  text-align: center;
+  max-width: 440px;
+  line-height: 1.65;
+  margin-bottom: 44px;
+  animation: rise 0.6s ease both;
+  animation-delay: 0.12s;
+}
+
+/* Drop Zone */
+.dropzone {
+  width: 100%; max-width: 520px;
+  background: var(--white);
+  border: 1.5px dashed var(--border);
+  border-radius: var(--r-md);
+  padding: 44px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  margin-bottom: 20px;
+  box-shadow: var(--gloss);
+  animation: rise 0.6s ease both;
+  animation-delay: 0.18s;
+}
+
+.dropzone:hover {
+  border-color: var(--border-h);
+  box-shadow: var(--shadow), var(--gloss);
+}
+
+.dropzone.drag-over {
+  border-color: var(--text);
+  background: var(--gold-bg);
+  transform: scale(1.01);
+}
+
+.dropzone-icon {
+  width: 36px; height: 36px;
+  margin: 0 auto 14px;
+  color: var(--text-3);
+  transition: color 0.25s;
+}
+
+.dropzone:hover .dropzone-icon { color: var(--text-2); }
+
+.dropzone-text {
+  font-size: 14px; font-weight: 500;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.dropzone-hint { font-size: 12px; color: var(--text-3); }
+
+.landing-or {
+  display: flex; align-items: center; gap: 14px;
+  width: 100%; max-width: 520px;
+  margin: 4px 0 18px;
+  animation: rise 0.6s ease both;
+  animation-delay: 0.22s;
+}
+
+.landing-or .line { flex: 1; height: 1px; background: var(--border); }
+.landing-or span {
+  font-size: 10px; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500;
+}
+
+.path-row {
+  display: flex; gap: 8px;
+  width: 100%; max-width: 520px;
+  margin-bottom: 14px;
+  animation: rise 0.6s ease both;
+  animation-delay: 0.26s;
+}
+
+.path-row input {
+  flex: 1;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-shadow: var(--gloss);
+}
+
+.path-row input:focus { border-color: var(--text-3); }
+.path-row input::placeholder { color: var(--text-3); }
+
+.queued {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  justify-content: center;
+  max-width: 520px;
+  margin-bottom: 28px;
+}
+
+.chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--text-2);
+  box-shadow: var(--gloss);
+  animation: grow 0.2s ease both;
+}
+
+.chip .x {
+  cursor: pointer; color: var(--text-3);
+  font-size: 14px; line-height: 1;
+  transition: color 0.15s;
+}
+
+.chip .x:hover { color: var(--del); }
+
+.landing-opts {
+  display: flex; gap: 16px; margin-top: 8px;
+  animation: rise 0.6s ease both;
+  animation-delay: 0.3s;
+}
+
+.landing-opts label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--text-3); cursor: pointer;
+}
+
+.landing-opts input[type="checkbox"] {
+  accent-color: var(--text);
+  width: 14px; height: 14px;
+}
+
+.type-filter-wrap {
+  max-width: 520px; width: 100%;
+  margin-top: 16px;
+}
+
+.type-filter-toggle {
+  font-size: 11px; font-weight: 500; color: var(--text-3);
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+  letter-spacing: 0.3px; text-transform: uppercase;
+  transition: color 0.15s; justify-content: center;
+}
+
+.type-filter-toggle:hover { color: var(--text-2); }
+
+.type-filter-grid {
+  display: none;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px; margin-top: 10px;
+}
+
+.type-filter-grid.open { display: grid; }
+
+.type-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 10px;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--r); font-size: 11px; color: var(--text-2);
+  cursor: pointer; transition: all 0.15s; box-shadow: var(--gloss);
+}
+
+.type-chip:hover { border-color: var(--border-h); }
+.type-chip input { accent-color: var(--text); width: 13px; height: 13px; margin: 0; }
+.type-chip.off { opacity: 0.4; }
+
+.results-type-select {
+  position: relative; display: inline-block;
+}
+
+.results-type-btn {
+  padding: 6px 14px; font-size: 11px; font-weight: 500;
+  color: var(--text-3); cursor: pointer; border: 1px solid var(--border);
+  background: var(--white); border-radius: var(--r);
+  display: flex; align-items: center; gap: 6px;
+  transition: all 0.15s;
+}
+
+.results-type-btn:hover { border-color: var(--border-h); color: var(--text-2); }
+
+.results-type-dropdown {
+  display: none; position: absolute; top: 100%; left: 0;
+  margin-top: 4px; background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--r-md); box-shadow: var(--shadow-lg);
+  min-width: 180px; z-index: 50; padding: 6px 0;
+}
+
+.results-type-dropdown.open { display: block; }
+
+.results-type-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 14px; font-size: 12px; color: var(--text-2);
+  cursor: pointer; transition: background 0.1s;
+}
+
+.results-type-item:hover { background: var(--muted); }
+.results-type-item input { accent-color: var(--text); width: 13px; height: 13px; margin: 0; }
+
+/* ── SCANNING ──────────────────────────────────────────── */
+.scanning {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 80px 32px;
+}
+
+.scan-spinner {
+  width: 32px; height: 32px;
+  border: 2px solid var(--deep);
+  border-top-color: var(--text);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 28px;
+}
+
+.scan-phase {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 300;
+  margin-bottom: 8px;
+}
+
+.scan-msg {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; color: var(--text-2);
+  margin-bottom: 28px;
+}
+
+.scan-bar {
+  width: 280px; height: 2px;
+  background: var(--deep);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+
+.scan-fill {
+  height: 100%; background: var(--text);
+  border-radius: 1px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+.scan-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--text-3);
+}
+
+.scan-count strong { color: var(--text); font-weight: 500; }
+
+/* ── RESULTS BAR ───────────────────────────────────────── */
+.results-bar {
+  position: fixed; top: 52px; left: 0; right: 0; z-index: 90;
+  background: rgba(244,244,242,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px; flex-wrap: wrap;
+}
+
+.pills {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  background: var(--white);
+}
+
+.pill {
+  padding: 6px 16px;
+  font-size: 11px; font-weight: 500;
+  color: var(--text-3);
+  cursor: pointer; border: none; background: none;
+  transition: all 0.15s;
+  border-right: 1px solid var(--border);
+  letter-spacing: 0.3px;
+}
+
+.pill:last-child { border-right: none; }
+.pill:hover { color: var(--text-2); background: var(--muted); }
+.pill.on { color: var(--text); background: var(--muted); }
+
+.results-acts { display: flex; gap: 8px; }
+
+/* ── GROUP CARD ────────────────────────────────────────── */
+.groups-area {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 120px 32px 160px;
+  display: flex; flex-direction: column;
+  gap: 16px;
+}
+
+.group {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: var(--gloss);
+  animation: rise 0.4s ease both;
+  transition: box-shadow 0.2s;
+}
+
+.group:hover { box-shadow: var(--shadow), var(--gloss); }
+
+.group-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap; gap: 8px;
+  background: var(--bg);
+}
+
+.group-left { display: flex; align-items: center; gap: 10px; }
+
+.badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.badge-exact { background: var(--teal-bg); color: var(--teal); }
+.badge-similar { background: var(--amber-bg); color: var(--amber); }
+
+.group-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--text-3);
+}
+
+.group-meta .recov { color: var(--keep); }
+
+.group-files {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 1px;
+  background: var(--border);
+}
+
+/* ── FILE CARD ─────────────────────────────────────────── */
+.fcard {
+  background: var(--white);
+  padding: 14px;
+  cursor: pointer;
+  transition: background 0.12s;
+  position: relative;
+  display: flex; flex-direction: column; gap: 10px;
+  border-left: 3px solid transparent;
+}
+
+.fcard:hover { background: var(--muted); }
+
+/* ── Locked: protected from deletion. Maximum visual signaling. ─────── */
+.fcard.is-locked {
+  background: rgba(27, 140, 90, 0.07);
+  border-left: 3px solid var(--keep);
+  box-shadow: inset 0 0 0 3px var(--keep);
+}
+.fcard.is-locked:hover { background: rgba(27, 140, 90, 0.11); }
+
+/* ── Marked for deletion: equally loud red treatment. ────────────────── */
+.fcard.is-del {
+  background: rgba(204, 10, 10, 0.06);
+  border-left: 3px solid #CC0A0A;
+  box-shadow: inset 0 0 0 3px #CC0A0A;
+}
+.fcard.is-del:hover { background: rgba(204, 10, 10, 0.10); }
+/* Subtle X-pattern overlay over the thumbnail when marked for deletion */
+.fcard.is-del .fthumb::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(45deg,
+      rgba(204,10,10,0.07) 0, rgba(204,10,10,0.07) 12px,
+      transparent 12px, transparent 24px);
+  pointer-events: none;
+}
+
+/* ── Best (auto-recommended keep, not yet locked) — soft hint only ──── */
+.fcard.is-best:not(.is-locked):not(.is-del) {
+  background: rgba(27, 140, 90, 0.03);
+  border-left-color: var(--keep);
+}
+
+/* Lock toggle button — sits top-left of every card. */
+.btn-lock {
+  position: absolute;
+  top: 8px; left: 8px;
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, 0.96);
+  /* Unlocked default: dashed border + muted icon color. Visually says
+     "empty / not yet locked" which makes the locked state's solid filled
+     style read as distinctly different. */
+  border: 1.5px dashed var(--text-3);
+  color: var(--text-3);
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 5;
+  transition: background 0.15s, transform 0.1s, border-color 0.15s, color 0.15s;
+  padding: 0;
+}
+.btn-lock:hover {
+  background: #fff;
+  transform: scale(1.08);
+  border-color: var(--text);
+  color: var(--text);
+}
+/* Locked: solid green fill + white icon. Strong, unmissable. */
+.fcard.is-locked .btn-lock {
+  background: var(--keep);
+  border: 1.5px solid var(--keep);
+  color: #fff;
+}
+.fcard.is-locked .btn-lock:hover { background: #167a4d; border-color: #167a4d; color: #fff; }
+
+/* Pulse animation when a card's lock state just changed in bulk. Provides
+   a visible "this just happened" cue. Only applied for one render, then
+   cleared. */
+@keyframes peanut-lock-pulse {
+  0%   { box-shadow: inset 0 0 0 3px var(--keep), 0 0 0 4px rgba(27,140,90,0.45); }
+  100% { box-shadow: inset 0 0 0 3px var(--keep), 0 0 0 0px rgba(27,140,90,0); }
+}
+@keyframes peanut-unlock-pulse {
+  0%   { box-shadow: 0 0 0 4px rgba(80,80,80,0.35); }
+  100% { box-shadow: 0 0 0 0px rgba(80,80,80,0); }
+}
+.fcard.pulse-lock   { animation: peanut-lock-pulse 0.6s ease-out; }
+.fcard.pulse-unlock { animation: peanut-unlock-pulse 0.6s ease-out; }
+
+/* Lock status banner — sits between the toolbar and the groups list.
+   Persistent readout of how many files are protected. */
+.lock-banner {
+  margin: 12px 16px 0;
+  padding: 10px 14px;
+  background: rgba(27, 140, 90, 0.06);
+  border: 1px solid rgba(27, 140, 90, 0.18);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lock-banner.empty {
+  background: rgba(0,0,0,0.02);
+  border-color: var(--border);
+  color: var(--text-2);
+}
+.lock-banner-icon { font-size: 16px; }
+.lock-banner-text { flex: 1; }
+.lock-banner-text strong { color: var(--keep); }
+.lock-banner.empty .lock-banner-text strong { color: var(--text); }
+
+.btn-del-inline {
+  background: rgba(204,10,10,0.05);
+  color: #CC0A0A;
+  border: 1px solid rgba(204,10,10,0.15);
+  padding: 3px 9px;
+  font-size: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 500;
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-del-inline:hover { background: rgba(204,10,10,0.1); }
+.btn-del-inline:active { transform: scale(0.96); }
+
+/* Thumb */
+.fthumb {
+  position: relative;
+  width: 100%; aspect-ratio: 16/10;
+  border-radius: var(--r);
+  overflow: hidden;
+  background: var(--muted);
+  cursor: zoom-in;
+}
+
+.fthumb img {
+  width: 100%; height: 100%;
+  object-fit: contain; display: block;
+}
+
+.fthumb-empty {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-3); font-size: 12px;
+}
+
+.fthumb-doc {
+  width: 100%; height: 100%;
+  padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 6px;
+  overflow: hidden;
+}
+
+.fthumb-doc-type {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 9px; font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+
+.fthumb-doc-type .doc-icon {
+  width: 14px; height: 14px;
+  border-radius: 2px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 7px; font-weight: 600; color: #fff;
+}
+
+.doc-icon-docx { background: #2B579A; }
+.doc-icon-xlsx { background: #217346; }
+.doc-icon-pptx { background: #D24726; }
+.doc-icon-pdf  { background: #B30B00; }
+.doc-icon-txt  { background: #6B6A65; }
+.doc-icon-csv  { background: #217346; }
+.doc-icon-md   { background: #1A1918; }
+.doc-icon-html { background: #E44D26; }
+.doc-icon-json { background: #F7DF1E; color: #000; }
+.doc-icon-py   { background: #3776AB; }
+.doc-icon-js   { background: #F7DF1E; color: #000; }
+.doc-icon-ts   { background: #3178C6; }
+.doc-icon-css  { background: #1572B6; }
+.doc-icon-java { background: #ED8B00; }
+.doc-icon-cpp  { background: #00599C; }
+.doc-icon-swift { background: #FA7343; }
+.doc-icon-go   { background: #00ADD8; }
+.doc-icon-rs   { background: #DEA584; }
+.doc-icon-rb   { background: #CC342D; }
+.doc-icon-php  { background: #777BB4; }
+.doc-icon-sh   { background: #4EAA25; }
+.doc-icon-sql  { background: #336791; }
+.doc-icon-mp3  { background: #1DB954; }
+.doc-icon-wav  { background: #4A90D9; }
+.doc-icon-flac { background: #2196F3; }
+.doc-icon-aac  { background: #FF9800; }
+.doc-icon-ogg  { background: #8BC34A; }
+.doc-icon-zip  { background: #FFB300; color: #000; }
+.doc-icon-rar  { background: #6D4C8F; }
+.doc-icon-odt  { background: #0D47A1; }
+.doc-icon-epub { background: #795548; }
+.doc-icon-yaml { background: #CB171E; }
+.doc-icon-xml  { background: #E44D26; }
+.doc-icon-tex  { background: #008080; }
+.doc-icon-default { background: #9E9D98; }
+
+.fthumb-doc-text {
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--text-2);
+  overflow: hidden;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 7;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* Floating tags */
+.ftag {
+  position: absolute;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 3px;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+}
+
+.ftag-tl { top: 6px; left: 6px; }
+.ftag-tr { top: 6px; right: 6px; }
+.ftag-bl { bottom: 6px; left: 6px; }
+.ftag-br { bottom: 6px; right: 6px; }
+
+.ftag-best { background: rgba(255,255,255,0.94); color: var(--keep); border: 1px solid var(--keep-bdr); }
+.ftag-locked {
+  background: var(--keep);
+  color: #fff;
+  border: 1px solid var(--keep);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+}
+.ftag-keep { background: rgba(255,255,255,0.94); color: var(--keep); border: 1px solid var(--keep-bdr); }
+.ftag-delete {
+  background: rgba(204,10,10,0.92);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+}
+.ftag-lossless { background: rgba(255,255,255,0.94); color: var(--lossless); border: 1px solid var(--keep-bdr); }
+.ftag-lossy { background: rgba(255,255,255,0.94); color: var(--lossy); border: 1px solid rgba(176,104,32,0.18); }
+.ftag-score { background: rgba(255,255,255,0.88); color: var(--text-2); border: 1px solid var(--border); }
+.ftag-sim { background: rgba(255,255,255,0.88); color: var(--text-2); border: 1px solid var(--border); }
+
+/* File info */
+.fname { font-weight: 500; font-size: 13px; word-break: break-all; line-height: 1.3; }
+
+.fdir {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: var(--text-3);
+  word-break: break-all; line-height: 1.4;
+}
+
+.fmeta {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: var(--text-2);
+}
+
+.fsource {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 500;
+  color: var(--text);
+  background: rgba(10,10,10,0.04);
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.factions { display: flex; gap: 6px; margin-top: 2px; }
+
+/* ── DETAIL PANEL ──────────────────────────────────────── */
+.detail-over {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(6px);
+  z-index: 200;
+  display: none;
+  align-items: stretch;
+}
+
+.detail-over.open { display: flex; }
+
+.detail-panel { flex: 1; display: flex; overflow: hidden; }
+
+.detail-img {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  padding: 32px;
+  background: rgba(0,0,0,0.04);
+}
+
+.detail-img img, .detail-img video {
+  max-width: 100%; max-height: 85vh;
+  object-fit: contain; border-radius: var(--r);
+  box-shadow: var(--shadow-lg);
+}
+
+.detail-info {
+  width: 340px;
+  background: var(--white);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 28px 22px;
+  flex-shrink: 0;
+}
+
+.detail-close {
+  position: fixed; top: 16px; right: 16px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  color: var(--text-2);
+  font-size: 16px;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  z-index: 210;
+  box-shadow: var(--shadow);
+}
+
+.detail-close:hover { background: var(--muted); color: var(--text); }
+
+.dsection { margin-bottom: 22px; }
+
+.dsection h4 {
+  font-size: 10px; font-weight: 500;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.drow {
+  display: flex; justify-content: space-between;
+  padding: 3px 0;
+  font-size: 12px;
+}
+
+.drow .lbl { color: var(--text-3); }
+.drow .val { color: var(--text); font-weight: 500; text-align: right; }
+
+/* ── COMPARE ───────────────────────────────────────────── */
+.compare-over {
+  position: fixed; inset: 0;
+  background: rgba(244,244,242,0.97);
+  backdrop-filter: blur(12px);
+  z-index: 250;
+  display: none;
+  align-items: center; justify-content: center;
+  flex-direction: column;
+}
+
+.compare-over.open { display: flex; }
+
+.compare-box {
+  position: relative;
+  max-width: 85vw; max-height: 75vh;
+  overflow: hidden;
+  border-radius: var(--r-md);
+  cursor: col-resize;
+  box-shadow: var(--shadow-lg), var(--gloss);
+  border: 1px solid var(--border);
+}
+
+.compare-box img {
+  display: block;
+  max-width: 85vw; max-height: 75vh;
+  object-fit: contain;
+}
+
+.compare-clip {
+  position: absolute; top: 0; left: 0; bottom: 0;
+  overflow: hidden;
+}
+
+.compare-clip img { display: block; }
+
+.compare-line {
+  position: absolute; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--text);
+  cursor: col-resize;
+  z-index: 5;
+}
+
+.compare-line::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 28px; height: 28px;
+  background: var(--white);
+  border: 2px solid var(--text);
+  border-radius: 50%;
+}
+
+.compare-labels {
+  display: flex; justify-content: space-between;
+  width: 85vw; max-width: 85vw;
+  padding: 14px 0;
+}
+
+.compare-lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--text-2);
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 5px 14px;
+}
+
+/* ── ACTION BAR ────────────────────────────────────────── */
+.actbar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(244,244,242,0.94);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  padding: 12px 32px;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+
+.actbar.show { transform: translateY(0); }
+
+.actbar-inner {
+  max-width: 1400px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px; flex-wrap: wrap;
+}
+
+.act-summary { font-size: 13px; color: var(--text-2); }
+
+.act-summary strong {
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.act-btns { display: flex; gap: 8px; }
+
+/* ── BROWSER MODAL ─────────────────────────────────────── */
+.bover {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.2);
+  backdrop-filter: blur(6px);
+  z-index: 250;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 32px;
+}
+
+.bover.open { display: flex; }
+
+.bbox {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  max-width: 560px; width: 100%;
+  max-height: 72vh;
+  display: flex; flex-direction: column;
+  box-shadow: var(--shadow-lg), var(--gloss);
+  animation: grow 0.2s ease both;
+}
+
+.bbox-top {
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.bbox-top h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300; font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.bcrumbs {
+  display: flex; align-items: center; gap: 3px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: var(--text-3);
+  overflow-x: auto; white-space: nowrap;
+}
+
+.bcrumbs span { cursor: pointer; padding: 2px 3px; border-radius: 3px; color: var(--text-2); transition: color 0.15s; }
+.bcrumbs span:hover { color: var(--text); }
+.bcrumbs .sep { color: var(--text-3); cursor: default; }
+.bcrumbs .sep:hover { color: var(--text-3); }
+
+.blist {
+  flex: 1; overflow-y: auto; padding: 4px 0;
+  min-height: 160px; max-height: 48vh;
+}
+
+.brow {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 22px;
+  cursor: pointer;
+  transition: background 0.1s;
+  border-left: 3px solid transparent;
+}
+
+.brow:hover { background: var(--muted); }
+.brow.picked { background: rgba(10,10,10,0.04); border-left-color: var(--text); }
+
+.brow-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+.brow-name { font-weight: 500; font-size: 13px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.brow-meta { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text-3); }
+.brow-arr { color: var(--text-3); font-size: 14px; }
+
+.bbox-bottom {
+  padding: 12px 22px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+
+.bsel-path {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  flex: 1; min-width: 0;
+}
+
+.bempty {
+  padding: 36px 22px;
+  text-align: center;
+  color: var(--text-3); font-size: 13px;
+}
+
+/* ── CONFIRM MODAL ─────────────────────────────────────── */
+.mover {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.2);
+  backdrop-filter: blur(4px);
+  z-index: 300;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 32px;
+}
+
+.mover.open { display: flex; }
+
+.mbox {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  max-width: 440px; width: 100%;
+  padding: 26px;
+  box-shadow: var(--shadow-lg), var(--gloss);
+  animation: grow 0.2s ease both;
+}
+
+.mbox h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300; font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.mbox p {
+  color: var(--text-2); font-size: 13px;
+  line-height: 1.6; margin-bottom: 22px;
+}
+
+.mbox-acts { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ── TOAST ─────────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 72px; left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 9px 18px;
+  font-size: 12px; font-weight: 500;
+  color: var(--text);
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 400;
+  pointer-events: none;
+  box-shadow: var(--gloss), var(--shadow);
+}
+
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── LIGHTBOX ───────────────────────────────────────────── */
+.lightbox {
+  position: fixed; inset: 0;
+  background: rgba(10,10,10,0.85);
+  backdrop-filter: blur(12px);
+  z-index: 280;
+  display: none;
+  align-items: center; justify-content: center;
+  cursor: zoom-out;
+  padding: 40px;
+}
+
+.lightbox.open { display: flex; }
+
+.lightbox img, .lightbox video {
+  max-width: 92vw;
+  max-height: 88vh;
+  object-fit: contain;
+  border-radius: var(--r-md);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  cursor: default;
+}
+
+.lightbox-close {
+  position: fixed; top: 16px; right: 16px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--r);
+  color: rgba(255,255,255,0.8);
+  font-size: 18px;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  z-index: 281;
+}
+
+.lightbox-close:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+.lightbox-info {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10,10,10,0.7);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--r);
+  padding: 8px 18px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  z-index: 281;
+  display: flex; gap: 16px;
+}
+
+.lightbox-doc {
+  max-width: 700px; width: 100%;
+  max-height: 80vh;
+  background: var(--white);
+  border-radius: var(--r-md);
+  padding: 32px;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  cursor: default;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-2);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ── EMPTY / RESPONSIVE ────────────────────────────────── */
+.empty-state {
+  text-align: center; padding: 72px 32px;
+}
+
+.empty-state h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300; font-size: 22px;
+  color: var(--text-2); margin-bottom: 6px;
+}
+
+.empty-state p { color: var(--text-3); font-size: 13px; }
+
+@media (max-width: 768px) {
+  .topbar { padding: 0 16px; }
+  .topbar-keys { display: none; }
+  .results-bar { padding: 8px 16px; }
+  .groups-area { padding: 112px 16px 160px; }
+  .group-files { grid-template-columns: 1fr; }
+  .landing { padding: 72px 20px; }
+  .detail-info { width: 260px; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <img src="/static/logo.svg" alt="Peanut" style="height:28px;width:auto;">
+    Peanut
+  </div>
+  <div class="topbar-stats" id="topStats" style="display:none;">
+    <div class="topbar-stat"><div class="topbar-stat-v" id="sFiles">0</div><div class="topbar-stat-l">Scanned</div></div>
+    <div class="topbar-stat"><div class="topbar-stat-v gold" id="sGroups">0</div><div class="topbar-stat-l">Groups</div></div>
+    <div class="topbar-stat"><div class="topbar-stat-v green" id="sRecover">0</div><div class="topbar-stat-l">Recoverable</div></div>
+  </div>
+  <div class="topbar-keys" id="topKeys" style="display:none;">
+    <span class="kbd">J</span><span class="kbd">K</span><span style="font-size:10px;color:rgba(244,244,242,0.4);margin-right:4px;">nav</span>
+    <span class="kbd">D</span><span style="font-size:10px;color:rgba(244,244,242,0.4);margin-right:4px;">mark</span>
+    <span class="kbd">E</span><span style="font-size:10px;color:rgba(244,244,242,0.4);margin-right:4px;">detail</span>
+    <span class="kbd kbd-btn" onclick="toggleLogPanel()" title="Toggle action log (L)">L</span><span style="font-size:10px;color:rgba(244,244,242,0.4);">log</span>
+  </div>
+  </div>
+
+<!-- LANDING -->
+<div id="viewLanding" class="landing">
+  <div class="landing-eyebrow">Duplicate finder</div>
+  <h1 class="landing-title">Find every <em>duplicate</em></h1>
+  <p class="landing-sub">Content-aware scanning that catches renamed, re-compressed, and resized copies. Review everything before you delete anything.</p>
+
+  <div class="dropzone" id="dropzone"
+       ondragover="event.preventDefault();this.classList.add('drag-over')"
+       ondragleave="this.classList.remove('drag-over')"
+       ondrop="handleDrop(event)"
+       onclick="openBrowser()">
+    <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+    </svg>
+    <div class="dropzone-text">Drop folders here or click to browse</div>
+    <div class="dropzone-hint" id="dropzoneHint">Images, videos, audio, documents, code, archives, and more</div>
+  </div>
+
+  <div class="landing-or">
+    <div class="line"></div><span>or type path</span><div class="line"></div>
+  </div>
+
+  <div class="path-row">
+    <input type="text" id="pathInput" placeholder="e.g. /Users/codybrowne/Pictures" onkeydown="if(event.key==='Enter')addPath()">
+    <button class="btn btn-outline btn-sm" onclick="addPath()">Add</button>
+  </div>
+
+  <div class="queued" id="queued"></div>
+
+  <button class="btn btn-dark" id="scanBtn" onclick="startScan()" disabled>Start Scan</button>
+  <div class="landing-opts">
+    <label><input type="checkbox" id="optRecursive" checked> Include subfolders</label>
+  </div>
+  <div class="type-filter-wrap">
+    <div class="type-filter-toggle" onclick="this.nextElementSibling.classList.toggle('open')">
+      <span>&#9662;</span> Filter by file type
+    </div>
+    <div class="type-filter-grid" id="typeFilterGrid">
+      <label class="type-chip"><input type="checkbox" checked data-cat="images"> Images</label>
+      <label class="type-chip"><input type="checkbox" checked data-cat="videos"> Videos</label>
+      <label class="type-chip"><input type="checkbox" checked data-cat="audio"> Audio</label>
+      <label class="type-chip"><input type="checkbox" checked data-cat="documents"> Documents</label>
+      <label class="type-chip"><input type="checkbox" checked data-cat="code"> Code</label>
+      <label class="type-chip"><input type="checkbox" checked data-cat="archives"> Archives</label>
+      <label class="type-chip"><input type="checkbox" checked data-cat="other"> Other</label>
+    </div>
+  </div>
+</div>
+
+<!-- SCANNING -->
+<div id="viewScanning" style="display:none" class="scanning">
+  <div class="scan-spinner"></div>
+  <div class="scan-phase" id="scanPhase">Finding duplicates</div>
+  <div class="scan-msg" id="scanMsg">Looking for files...</div>
+  <div class="scan-bar"><div class="scan-fill" id="scanProgress"></div></div>
+  <div class="scan-count" id="scanLive">Groups found: <strong>0</strong></div>
+  <button class="btn btn-outline btn-sm" style="margin-top:24px;padding:6px 16px;" onclick="cancelScan()">Cancel</button>
+</div>
+
+<!-- RESULTS BAR -->
+<div id="resultsBar" style="display:none" class="results-bar">
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <div class="pills">
+      <button class="pill on" onclick="setFilter('all',this)">All</button>
+      <button class="pill" onclick="setFilter('exact',this)">Exact</button>
+      <button class="pill" onclick="setFilter('similar',this)">Similar</button>
+      <button class="pill" onclick="setFilter('lossless',this)">Lossless / Lossy</button>
+    </div>
+    <div class="results-type-select">
+      <button class="results-type-btn" onclick="toggleTypeDropdown(event)">
+        File types <span style="font-size:9px;">&#9662;</span>
+      </button>
+      <div class="results-type-dropdown" id="typeDropdown">
+        <label class="results-type-item"><input type="checkbox" checked onchange="applyTypeFilter(event)" data-ft="all"> All types</label>
+        <label class="results-type-item"><input type="checkbox" checked onchange="applyTypeFilter(event)" data-ft="image"> Images</label>
+        <label class="results-type-item"><input type="checkbox" checked onchange="applyTypeFilter(event)" data-ft="video"> Videos</label>
+        <label class="results-type-item"><input type="checkbox" checked onchange="applyTypeFilter(event)" data-ft="audio"> Audio</label>
+        <label class="results-type-item"><input type="checkbox" checked onchange="applyTypeFilter(event)" data-ft="document"> Documents</label>
+        <label class="results-type-item"><input type="checkbox" checked onchange="applyTypeFilter(event)" data-ft="code"> Code</label>
+        <label class="results-type-item"><input type="checkbox" checked onchange="applyTypeFilter(event)" data-ft="archive"> Archives</label>
+        <label class="results-type-item"><input type="checkbox" checked onchange="applyTypeFilter(event)" data-ft="other"> Other</label>
+      </div>
+    </div>
+  </div>
+  <div class="results-acts">
+    <button id="btnLockAllBest" class="btn btn-outline btn-sm" onclick="lockAllBest()" title="Lock all recommended-keep files so they can never be deleted">🔒 Lock all best</button>
+    <button id="btnUnlockAll" class="btn btn-outline btn-sm" onclick="unlockAll()" title="Unlock all locked files">🔓 Unlock all</button>
+    <button class="btn btn-outline btn-sm" onclick="autoSelect()">Auto-Select Dupes</button>
+    <button class="btn btn-danger btn-sm" onclick="bulkDeleteDupes()">Bulk Delete Duplicates</button>
+    <button class="btn btn-outline btn-sm" onclick="clearSel()">Clear</button>
+  </div>
+</div>
+
+<!-- LOCK STATUS BANNER -->
+<div id="lockBanner" class="lock-banner" style="display:none;"></div>
+
+<!-- GROUPS -->
+<div id="groupsArea" class="groups-area"></div>
+
+<!-- ACTION BAR -->
+<div id="actBar" class="actbar">
+  <div class="actbar-inner">
+    <div class="act-summary"><strong id="selCount">0</strong> files &middot; <strong id="selSize">0</strong> recoverable<span id="lockedNote" style="margin-left:14px;color:var(--keep);"></span></div>
+    <div class="act-btns">
+      <button class="btn btn-outline btn-sm" onclick="clearSel()">Cancel</button>
+      <button class="btn btn-outline btn-sm" onclick="showMoveModal()">Move to Folder</button>
+      <button class="btn btn-danger btn-sm" onclick="showDelModal('trash')">Trash</button>
+      <button class="btn btn-danger btn-sm" style="background:rgba(204,10,10,0.1);" onclick="showDelModal('permanent')">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ACTION LOG PANEL -->
+<div id="logOverlay" class="log-overlay">
+  <div class="log-head">
+    <div class="log-title">Action log</div>
+    <span class="log-count" id="logCount">0 entries</span>
+    <button class="btn btn-outline btn-sm" style="padding:4px 10px;font-size:11px;" onclick="copyLogToClipboard()">Copy all</button>
+    <button class="btn btn-outline btn-sm" style="padding:4px 10px;font-size:11px;" onclick="clearLogPrompt(event)" title="Click to clear the view (file kept on disk). Shift+click to also delete the log file.">Clear log</button>
+    <button class="btn btn-outline btn-sm" style="padding:4px 10px;font-size:11px;" onclick="toggleLogPanel()">Close</button>
+  </div>
+  <div class="log-list" id="logList">
+    <div class="log-empty">No actions yet. Lock, unlock, delete, or move a file and it'll show up here.</div>
+  </div>
+</div>
+
+<!-- DETAIL -->
+<div id="detailOver" class="detail-over">
+  <div class="detail-panel">
+    <div class="detail-img" id="detailPreview"></div>
+    <div class="detail-info" id="detailInfo"></div>
+  </div>
+  <button class="detail-close" onclick="closeDetail()">&times;</button>
+</div>
+
+<!-- COMPARE -->
+<div id="compareOver" class="compare-over" onclick="if(event.target===this)closeCompare()">
+  <div class="compare-box" id="compareBox"></div>
+  <div class="compare-labels" id="compareLabels"></div>
+  <button class="btn btn-outline btn-sm" onclick="closeCompare()" style="margin-top:10px;">Close</button>
+</div>
+
+<!-- BROWSER -->
+<div id="bOver" class="bover" onclick="if(event.target===this)closeBrowser()">
+  <div class="bbox">
+    <div class="bbox-top">
+      <h3>Select Folder</h3>
+      <div class="bcrumbs" id="bCrumbs"></div>
+    </div>
+    <div class="blist" id="bList"></div>
+    <div class="bbox-bottom">
+      <div class="bsel-path" id="bSelDisplay">Pick a folder</div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button class="btn btn-outline btn-sm" onclick="closeBrowser()">Done</button>
+        <button class="btn btn-outline btn-sm" id="bAddCurMore" onclick="addBCurMore()" style="display:none;">Add & Browse More</button>
+        <button class="btn btn-outline btn-sm" id="bAddSelMore" onclick="addBSelMore()" style="display:none;">Add & Browse More</button>
+        <button class="btn btn-dark btn-sm" id="bAddCur" onclick="addBCur()" style="display:none;">Add & Done</button>
+        <button class="btn btn-dark btn-sm" id="bAddSel" onclick="addBSel()" style="display:none;">Add & Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div id="mOver" class="mover">
+  <div class="mbox">
+    <h3 id="mTitle">Confirm</h3>
+    <p id="mMsg"></p>
+    <div id="mMoveInput" style="display:none;margin-bottom:18px;">
+      <input type="text" id="mMovePath" placeholder="~/Peanut_Review" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;outline:none;">
+    </div>
+    <div class="mbox-acts">
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="mConfirm" onclick="execAction()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="if(event.target===this)closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <div id="lightboxContent"></div>
+  <div class="lightbox-info" id="lightboxInfo"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML;};
+const escA=s=>s.replace(/'/g,"\\'").replace(/\\/g,"\\\\");
+function fmtSize(b){if(!b)return'0 B';const u=['B','KB','MB','GB','TB'];const i=Math.floor(Math.log(b)/Math.log(1024));return(b/Math.pow(1024,i)).toFixed(i>0?1:0)+' '+u[i];}
+function fmtDur(s){if(!s)return'';return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');}
+function toast(m, dur){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur||2200);}
+
+// ─── Action log ─────────────────────────────────────────────────────────
+// Persistent record of every action (delete, move, lock, unlock, scan,
+// errors). The server keeps the authoritative log in ~/.peanut/actions.log;
+// the client fetches and displays it. Toggle with L key or button.
+
+let _logEntries = [];
+
+async function fetchLog(){
+  try {
+    const r = await fetch('/api/log?n=500');
+    const d = await r.json();
+    _logEntries = d.entries || [];
+    renderLogPanel();
+  } catch(e){ /* silent */ }
+}
+
+const _LOG_ICONS = {
+  trash:            '🗑',
+  delete_permanent: '⚠️',
+  move:             '➜',
+  lock:             '🔒',
+  unlock:           '🔓',
+  scan_started:     '◐',
+  scan_complete:    '✓',
+  scan_failed:      '✗',
+  delete_failed:    '✗',
+  delete_blocked:   '🛡',
+  move_failed:      '✗',
+  log_clear:        '⌫',
+};
+
+function _formatLogTime(iso){
+  // ISO → "11:42 PM" (or 24h if locale prefers)
+  try {
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit', second:'2-digit'});
+  } catch(e){ return iso; }
+}
+
+function renderLogPanel(){
+  const list = $('logList');
+  const count = $('logCount');
+  if(!list || !count) return;
+  count.textContent = `${_logEntries.length} ${_logEntries.length===1?'entry':'entries'}`;
+  if(!_logEntries.length){
+    list.innerHTML = '<div class="log-empty">No actions yet. Lock, unlock, delete, or move a file and it\'ll show up here.</div>';
+    return;
+  }
+  list.innerHTML = _logEntries.map(e => {
+    const ts = _formatLogTime(e.ts);
+    const icon = _LOG_ICONS[e.action] || '·';
+    const lvl = e.level || 'info';
+    const path = e.path ? `<span class="log-path">${esc(e.path)}</span>` : '';
+    return `<div class="log-entry lvl-${esc(lvl)} act-${esc(e.action||'')}">
+      <span class="log-ts">${esc(ts)}</span>
+      <span class="log-icon">${icon}</span>
+      <span class="log-msg">${esc(e.message||'')}${path}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleLogPanel(){
+  const o = $('logOverlay');
+  if(!o) return;
+  const opening = !o.classList.contains('open');
+  if(opening){
+    fetchLog().then(() => o.classList.add('open'));
+  } else {
+    o.classList.remove('open');
+  }
+}
+
+// Refresh the log only if its panel is currently visible. Called after
+// every meaningful action so the user sees their action appear in real
+// time. Skipped when panel is closed to avoid pointless network calls.
+function refreshLogIfOpen(){
+  const o = $('logOverlay');
+  if(o && o.classList.contains('open')) fetchLog();
+}
+
+async function clearLogPrompt(ev){
+  // Default: soft clear — empty the view, keep the file on disk.
+  // Shift+click: hard clear — delete the file too (after extra confirm).
+  const wantHard = !!(ev && ev.shiftKey);
+  if(wantHard){
+    if(!confirm('Hard clear — also DELETE the log file on disk? This permanently removes the audit trail and cannot be undone.')) return;
+  } else {
+    if(!confirm('Clear the action log view?\n\nThe log file on disk will be kept as a backup. (Shift+click "Clear log" if you want to delete the file too.)')) return;
+  }
+  try {
+    await fetch('/api/log/clear', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({hard: wantHard}),
+    });
+    _logEntries = [];
+    renderLogPanel();
+    toast(wantHard ? 'Log cleared (file deleted)' : 'Log view cleared (file kept on disk)');
+  } catch(e){
+    toast('Failed to clear log');
+  }
+}
+
+async function copyLogToClipboard(){
+  if(!_logEntries.length){ toast('Nothing to copy'); return; }
+  const text = _logEntries.map(e =>
+    `[${e.ts}] ${(e.level||'info').toUpperCase()} ${e.action||''} — ${e.message||''}${e.path?' ('+e.path+')':''}`
+  ).join('\n');
+  try {
+    await navigator.clipboard.writeText(text);
+    toast(`Copied ${_logEntries.length} entries to clipboard`);
+  } catch(e){
+    toast('Could not copy — clipboard access denied');
+  }
+}
+
+function recomputeStats(){
+  // After deletes, recompute the live stats so the top-bar stays accurate.
+  // (sFiles stays as originally scanned — that count doesn't decrement; it
+  //  represents "files we looked at this scan", not "files still on disk".)
+  let recoverable = 0;
+  for(const g of groups){
+    // Recoverable bytes = sum of all files in group MINUS the largest one
+    // (the one we'd keep). This matches scanner.py's recoverable_bytes calc.
+    if(!g.files || g.files.length < 2) continue;
+    const sizes = g.files.map(f => f.size || 0);
+    const maxSize = Math.max(...sizes);
+    const total = sizes.reduce((a,b) => a+b, 0);
+    recoverable += (total - maxSize);
+  }
+  $('sGroups').textContent = groups.length;
+  $('sRecover').textContent = fmtSize(recoverable);
+}
+
+// Show a result toast for a delete operation, surfacing errors and
+// locked-file rejections to the user instead of silently swallowing them.
+function reportDeleteResult(d, action){
+  const errors = d.errors || [];
+  const blocked = d.blocked_locked || [];
+  const gone = (d.deleted || []).length + (d.moved || []).length;
+
+  // Categorize errors. "Not found" is special — the file is already gone,
+  // which is what the user wanted. Treat as success and auto-clean from
+  // the UI rather than scaring them with "X failed".
+  const notFoundPaths = errors.filter(e => e.error === 'Not found').map(e => e.path);
+  const realErrors = errors.filter(e => e.error !== 'Not found');
+
+  // Remove any "not found" cards from the in-memory groups so they
+  // disappear from the UI naturally on next render. The files weren't
+  // there to begin with, so reflecting that is the correct behavior.
+  if(notFoundPaths.length){
+    const ghostSet = new Set(notFoundPaths);
+    for(const g of groups){
+      g.files = g.files.filter(f => !ghostSet.has(f.path));
+    }
+    groups = groups.filter(g => g.files.length >= 2);
+  }
+
+  // Build a useful, specific toast.
+  const totalGone = gone + notFoundPaths.length;  // count "already gone" as success
+  let msg = '';
+  if(totalGone) msg += `${totalGone} file${totalGone===1?'':'s'} ${action}`;
+  if(blocked.length){
+    msg += (msg ? ' · ' : '') + `🔒 ${blocked.length} skipped (locked)`;
+  }
+  if(realErrors.length){
+    // Group errors by error message so the toast is actually informative.
+    // "3 failed: Permission denied" is helpful. "3 failed" is not.
+    const byMsg = {};
+    for(const e of realErrors){
+      const key = e.error || 'Unknown error';
+      byMsg[key] = (byMsg[key] || 0) + 1;
+    }
+    const reasons = Object.entries(byMsg)
+      .map(([reason, count]) => `${count} ${reason.toLowerCase()}`)
+      .join(', ');
+    msg += (msg ? ' · ' : '') + `⚠️ Failed: ${reasons}`;
+    // Full detail to console for users who want to investigate
+    console.warn('Delete errors (full detail):', realErrors);
+  }
+  if(!msg) msg = 'Nothing was deleted';
+  // Longer duration when there are errors so the user has time to read.
+  toast(msg, realErrors.length ? 5500 : 2200);
+}
+
+let paths=[],groups=[],stats={},filter='all',selected=new Set(),actionMode='trash',liveGroupCount=0,focusedGroup=-1;
+// `locked` mirrors the server-side locked_files table. Persists across
+// scans; hydrated on every results render via /api/locks.
+let locked=new Set();
+
+// ── Locks (client-side state mirror) ────────────────────────────────────
+async function fetchLocks(){
+  try {
+    const r = await fetch('/api/locks');
+    const d = await r.json();
+    locked = new Set(d.locked || []);
+  } catch(e) { /* leave existing set if server unreachable */ }
+}
+
+async function setLocked(paths, lockIt){
+  // Optimistic update: flip client state immediately so the UI reacts
+  // without waiting for the server roundtrip.
+  if(lockIt){ paths.forEach(p => locked.add(p)); }
+  else      { paths.forEach(p => locked.delete(p)); }
+  // Locked files can't also be selected for deletion — clear that.
+  if(lockIt) paths.forEach(p => selected.delete(p));
+  // Targeted update: only mutate the cards whose state actually changed.
+  // Pass pulseLock so each card gets its 600ms ring animation. With 900
+  // groups, this turns "rebuild all 900 from scratch" into "tweak 900
+  // existing cards' classnames" which is dramatically faster.
+  updateCardStates(paths, { pulseLock: lockIt });
+  updateChrome();
+  // Sync with server. On a successful response, the client `locked` Set
+  // is replaced with the server's authoritative view — this resolves any
+  // race where the server already had locks the client didn't know about.
+  try {
+    const r = await fetch('/api/locks/toggle', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({paths, lock: lockIt}),
+    });
+    const d = await r.json();
+    if(d.locked){
+      const serverLocked = new Set(d.locked);
+      // If the server's view differs from ours, update only the cards
+      // whose lock state diverged — don't re-render everything.
+      const divergedPaths = [];
+      // Anything we have locked that server doesn't (or vice versa)
+      for(const p of locked) if(!serverLocked.has(p)) divergedPaths.push(p);
+      for(const p of serverLocked) if(!locked.has(p)) divergedPaths.push(p);
+      locked = serverLocked;
+      if(divergedPaths.length){
+        updateCardStates(divergedPaths);
+        updateChrome();
+      }
+    }
+  } catch(e) {
+    // Network failure — re-sync from server, but only refresh chrome
+    // (no need to nuke all cards just because one fetch failed).
+    fetchLocks().then(updateChrome);
+  }
+  // Refresh the log panel if the user has it open, so they see their
+  // lock/unlock action appear live.
+  refreshLogIfOpen();
+}
+
+function toggleLock(path){
+  setLocked([path], !locked.has(path));
+}
+
+// How many "Best" files exist + how many of them are currently locked.
+// Drives the dynamic Lock/Unlock button label and disabled state.
+function bestLockStats(){
+  let total = 0, lockedCount = 0;
+  for(const g of groups){
+    if(!g.recommended_keep) continue;
+    total++;
+    if(locked.has(g.recommended_keep)) lockedCount++;
+  }
+  return { total, lockedCount };
+}
+
+function lockAllBest(){
+  const targets = [];
+  for(const g of groups){
+    if(g.recommended_keep && !locked.has(g.recommended_keep)){
+      targets.push(g.recommended_keep);
+    }
+  }
+  if(!targets.length){ toast('All best files are already locked'); return; }
+  setLocked(targets, true);
+  toast(`🔒 Locked ${targets.length} best file${targets.length===1?'':'s'}`);
+}
+
+function unlockAll(){
+  if(!locked.size){ toast('Nothing is locked'); return; }
+  // Confirm before unlocking many files at once — this is a destructive-
+  // intent action because it removes protection from previously-secured files.
+  if(locked.size > 5){
+    if(!confirm(`Unlock ${locked.size} files? They will become eligible for deletion.`)) return;
+  }
+  const targets = Array.from(locked);
+  setLocked(targets, false);
+  toast(`🔓 Unlocked ${targets.length} file${targets.length===1?'':'s'}`);
+}
+let bCurPath='',bSelPath_='';
+let activeTypes=new Set(['image','video','audio','document','code','archive','other']);
+
+// Paths
+async function addPath(p, opts){
+  // opts = { silent: bool } — silent suppresses the per-add toast,
+  // used by handleDrop which shows an aggregated toast at the end.
+  const silent = opts && opts.silent === true;
+  const input = document.getElementById('pathInput');
+  let raw = '';
+  if(p && typeof p === 'string') {
+    raw = p;
+  } else if(input) {
+    raw = input.value || '';
+  }
+  const v = raw.trim();
+
+  // Empty input → open the folder browser. The Add button is more useful
+  // that way (typed path → adds it, no path → opens picker) and it never
+  // punishes the user for clicking with an empty box.
+  if(!v){
+    try {
+      openBrowser();
+    } catch(e) {
+      toast('Could not open folder picker — try refreshing the page');
+    }
+    return;
+  }
+  if(paths.includes(v)){
+    if(!silent) toast(`"${v}" is already in your list`);
+    if(input) input.value = '';
+    return;
+  }
+  // Validate the path exists on disk before adding it.
+  try {
+    const r = await fetch('/api/browse?path=' + encodeURIComponent(v));
+    const d = await r.json();
+    if(!r.ok || d.error){
+      if(!silent) toast(`Folder not found: ${v}`);
+      return;
+    }
+  } catch(e) {
+    // Network failure — trust the user. Scan-time validation catches it.
+  }
+  paths.push(v);
+  if(input) input.value = '';
+  renderPaths();
+  $('scanBtn').disabled = false;
+  if(!silent) toast(`Added: ${v}`);
+}
+function rmPath(i){paths.splice(i,1);renderPaths();$('scanBtn').disabled=paths.length===0;}
+function renderPaths(){$('queued').innerHTML=paths.map((p,i)=>`<span class="chip">${esc(p)}<span class="x" onclick="rmPath(${i})">&times;</span></span>`).join('');}
+
+// Native environment detection. pywebview injects window.pywebview when
+// running inside the desktop app. In native mode, drag-and-drop is
+// handled Python-side by peanut_desktop.py — it captures the real
+// filesystem paths and pushes them back into JS via addDroppedPaths().
+// The handleDrop() below only needs to manage the visual feedback in
+// native mode and the fallback message in browser mode.
+const isNativeApp = () => typeof window.pywebview !== 'undefined';
+
+// Called from Python (peanut_desktop.py's drop handler) with real
+// filesystem paths captured from a native drop event. Each path goes
+// through the same validated addPath() flow as typed-in paths.
+window.addDroppedPaths = async function(pathsList){
+  if(!Array.isArray(pathsList) || pathsList.length === 0){
+    toast('Nothing to add');
+    return;
+  }
+  let added = 0;
+  for(const p of pathsList){
+    const before = paths.length;
+    await addPath(p, {silent: true});
+    if(paths.length > before) added++;
+  }
+  if(added > 0){
+    toast(`Added ${added} folder${added===1?'':'s'} from drop`);
+  } else {
+    toast('Those folders are already in your list');
+  }
+};
+
+async function handleDrop(e){
+  e.preventDefault();
+  $('dropzone').classList.remove('drag-over');
+  if(isNativeApp()){
+    // Native app: the Python-side handler in peanut_desktop.py is what
+    // actually receives the dropped paths. It calls addDroppedPaths()
+    // back into JS asynchronously. Nothing to do here besides cleanup.
+    return;
+  }
+  // Browser path: explain why drag-and-drop is limited and point at the
+  // text box / native app. Browsers strip filesystem paths from drag
+  // events for security; we can't change that.
+  if(e.dataTransfer && e.dataTransfer.items && e.dataTransfer.items.length > 0){
+    toast('Browser drag-and-drop can\'t pass folder paths. Use the text box below to type or paste the full path (e.g. /Users/you/Pictures), or download the desktop app for native drag-and-drop.', 6000);
+  }
+}
+
+// Browser
+function openBrowser(){bCurPath='';bSelPath_='';$('bOver').classList.add('open');browseTo('');}
+function closeBrowser(){
+  $('bOver').classList.remove('open');
+  if($('bOver').dataset.mode==='move'){
+    moveTargetPath='';
+    $('bOver').dataset.mode='';
+    $('bOver').querySelector('.bbox-top h3').textContent='Select Folder';
+  }
+}
+function browseTo(p){
+  bCurPath=p;bSelPath_='';updateBB();
+  $('bList').innerHTML='<div class="bempty">Loading...</div>';
+  fetch(p?`/api/browse?path=${encodeURIComponent(p)}`:'/api/browse').then(r=>r.json()).then(d=>{
+    if(d.error){$('bList').innerHTML=`<div class="bempty">${esc(d.error)}</div>`;return;}
+    const bc=$('bCrumbs');
+    if(d.is_root||!d.current){bc.innerHTML='<span style="color:var(--text);cursor:default;">Quick Access</span>';}
+    else{const parts=d.current.split('/').filter(Boolean);let h='<span onclick="browseTo(\'\')">Home</span>',a='';parts.forEach((p,i)=>{a+='/'+p;const x=a;h+=`<span class="sep">/</span>`;h+=i===parts.length-1?`<span style="color:var(--text);cursor:default;">${esc(p)}</span>`:`<span onclick="browseTo('${escA(x)}')">${esc(p)}</span>`;});bc.innerHTML=h;}
+    if(!d.dirs.length){$('bList').innerHTML='<div class="bempty">No subfolders</div>';updateBB();return;}
+    $('bList').innerHTML=d.dirs.map(x=>{
+      const ico=x.icon==='drive'?'\u{1F4BE}':x.icon==='home'?'\u{1F3E0}':x.icon==='image'?'\u{1F5BC}':x.icon==='film'?'\u{1F3AC}':x.icon==='download'?'\u2B07':x.icon==='desktop'?'\u{1F5A5}':x.icon==='music'?'\u{1F3B5}':x.icon==='file'?'\u{1F4C4}':'\u{1F4C1}';
+      const meta=x.media_count>0?`${x.media_count} media`:'';
+      return`<div class="brow" onclick="pickB(this,'${escA(x.path)}')" ondblclick="browseTo('${escA(x.path)}')"><div class="brow-icon">${ico}</div><div class="brow-name">${esc(x.name)}</div><div class="brow-meta">${meta}</div><div class="brow-arr">\u203A</div></div>`;
+    }).join('');
+    updateBB();
+  });
+}
+function pickB(el,p){document.querySelectorAll('.brow.picked').forEach(r=>{if(r!==el)r.classList.remove('picked');});el.classList.toggle('picked');bSelPath_=el.classList.contains('picked')?p:'';updateBB();}
+function updateBB(){
+  const ac=$('bAddCur'),as=$('bAddSel'),acm=$('bAddCurMore'),asm=$('bAddSelMore'),sp=$('bSelDisplay');
+  const queuedCount=paths.length;
+  const queuedLabel=queuedCount?` (${queuedCount} queued)`:'';
+  const isMoveMode=$('bOver').dataset.mode==='move';
+
+  if(isMoveMode){
+    asm.style.display='none';acm.style.display='none';
+    if(bSelPath_){
+      as.style.display='inline-flex';ac.style.display='none';
+      as.textContent='Move Here';
+      as.onclick=()=>executeMove(bSelPath_);
+      sp.textContent='Move to: '+bSelPath_;
+    }else if(bCurPath){
+      as.style.display='none';ac.style.display='inline-flex';
+      ac.textContent='Move Here';
+      ac.onclick=()=>executeMove(bCurPath);
+      sp.textContent='Move to: '+bCurPath;
+    }else{
+      as.style.display='none';ac.style.display='none';
+      sp.textContent='Pick a destination folder';
+    }
+    return;
+  }
+
+  // Default add-to-scan mode
+  as.textContent='Add & Done';as.onclick=addBSel;
+  ac.textContent='Add & Done';ac.onclick=addBCur;
+
+  if(bSelPath_){
+    as.style.display='inline-flex';ac.style.display='none';
+    asm.style.display='inline-flex';acm.style.display='none';
+    sp.textContent=bSelPath_+queuedLabel;
+  }else if(bCurPath){
+    as.style.display='none';ac.style.display='inline-flex';
+    asm.style.display='none';acm.style.display='inline-flex';
+    sp.textContent=bCurPath+queuedLabel;
+  }else{
+    as.style.display='none';ac.style.display='none';
+    asm.style.display='none';acm.style.display='none';
+    sp.textContent=queuedCount?`${queuedCount} folder${queuedCount>1?'s':''} queued`:'Double-click to open, single-click to select';
+  }
+}
+function addBSel(){if(bSelPath_&&!paths.includes(bSelPath_)){paths.push(bSelPath_);renderPaths();$('scanBtn').disabled=false;}closeBrowser();}
+function addBCur(){if(bCurPath&&!paths.includes(bCurPath)){paths.push(bCurPath);renderPaths();$('scanBtn').disabled=false;}closeBrowser();}
+function addBSelMore(){
+  if(bSelPath_&&!paths.includes(bSelPath_)){paths.push(bSelPath_);renderPaths();$('scanBtn').disabled=false;}
+  bSelPath_='';document.querySelectorAll('.brow.picked').forEach(r=>r.classList.remove('picked'));
+  updateBB();toast(`Added. ${paths.length} folder${paths.length>1?'s':''} queued`);
+}
+function addBCurMore(){
+  if(bCurPath&&!paths.includes(bCurPath)){paths.push(bCurPath);renderPaths();$('scanBtn').disabled=false;}
+  updateBB();toast(`Added. ${paths.length} folder${paths.length>1?'s':''} queued`);
+}
+
+// Scan SSE
+function cancelScan(){
+  // Best-effort: tell the server to clear its state, then return to landing.
+  // The actual scan thread keeps running until it finishes (Python doesn't
+  // make killing threads safe), but the UI stops listening and the user
+  // can start a new scan.
+  fetch('/api/cancel-scan',{method:'POST'}).catch(()=>{});
+  $('viewScanning').style.display='none';
+  $('viewLanding').style.display='';
+  toast('Scan cancelled');
+}
+function startScan(){
+  $('viewLanding').style.display='none';$('viewScanning').style.display='flex';
+  groups=[];liveGroupCount=0;selected.clear();
+  // Get selected file type categories
+  const cats=[];
+  document.querySelectorAll('#typeFilterGrid input[data-cat]').forEach(cb=>{
+    if(cb.checked)cats.push(cb.dataset.cat);
+  });
+  fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paths,recursive:$('optRecursive').checked,file_types:cats.length<7?cats:[]})}).then(async r=>{
+    if(!r.ok){
+      // Scan failed to start (validation error, etc.). Bounce back to
+      // landing so the user isn't stuck on the loading screen.
+      let msg = 'Could not start scan';
+      try {
+        const body = await r.json();
+        if(body && body.error) msg = body.error;
+      } catch(e){}
+      $('viewScanning').style.display='none';
+      $('viewLanding').style.display='';
+      toast(msg);
+      return;
+    }
+    const es=new EventSource('/api/stream');
+    es.onmessage=e=>{
+      const m=JSON.parse(e.data);
+      if(m.event==='status'||m.event==='progress'){
+        $('scanMsg').textContent=m.data.message||'';
+        if(m.data.total)$('scanProgress').style.width=Math.round(m.data.current/m.data.total*100)+'%';
+        // Heading stays as "Finding duplicates" — the dynamic message field
+        // already conveys per-phase info ("Comparing 8533 images...",
+        // "Fingerprinting audio...", etc.) so we don't overwrite scanPhase.
+      }else if(m.event==='group'){groups.push(m.data);liveGroupCount++;$('scanLive').innerHTML=`Groups found: <strong>${liveGroupCount}</strong>`;}
+      else if(m.event==='complete'){es.close();stats=m.data.stats||{};showResults();}
+      else if(m.event==='error'){
+        es.close();
+        // Show the actual error message prominently so the user knows
+        // what went wrong, plus a "Back to start" button so they're not
+        // trapped on the scanning screen.
+        const phase = $('scanPhase');
+        const msg = $('scanMsg');
+        const cancelBtn = document.querySelector('#viewScanning button');
+        if(phase) phase.textContent = 'Scan failed';
+        if(msg){
+          msg.innerHTML = `<div style="color:#CC0A0A;font-weight:500;margin-bottom:8px;">${esc(m.data.message || 'Unknown error')}</div>` +
+            `<div style="font-size:12px;color:var(--text-3);">The scan stopped before finishing. You can try again with a smaller folder or check the action log (press <span class="kbd" style="display:inline-block;background:rgba(0,0,0,0.08);color:var(--text-2);">L</span>) for details.</div>`;
+        }
+        if(cancelBtn){
+          cancelBtn.textContent = 'Back to start';
+        }
+        // Refresh the log panel if open — the scan_failed entry will be there
+        refreshLogIfOpen();
+      }
+    };es.onerror=()=>es.close();
+  }).catch(err=>{
+    // Network failure — also bounce back so we don't hang the UI.
+    $('viewScanning').style.display='none';
+    $('viewLanding').style.display='';
+    toast('Could not reach the server. Is Peanut still running?');
+  });
+}
+
+async function showResults(){
+  $('viewScanning').style.display='none';
+  $('topStats').style.display='flex';$('topKeys').style.display='flex';$('resultsBar').style.display='flex';
+  $('sFiles').textContent=stats.total_files||0;$('sGroups').textContent=groups.length;$('sRecover').textContent=fmtSize(stats.recoverable_bytes||0);
+  if(!groups.length){
+    $('groupsArea').innerHTML='<div class="empty-state"><h3>No duplicates found</h3><p>Your files are all unique.</p></div>';
+    return;
+  }
+  // Hydrate locks BEFORE the initial render so cards render in the
+  // correct lock state from the start (no flash of unlocked → locked).
+  await fetchLocks();
+  // Initial render of all groups — must happen before any targeted card
+  // updates (setLocked, autoSelect) which look up cards by data-path in
+  // the DOM. Without this initial render, the cards don't exist yet and
+  // the entire results area is empty even though groups[] is populated.
+  renderGroups();
+  // Auto-lock any "Best" file that isn't already locked from a prior
+  // session. Targeted update — only the changed cards repaint.
+  const newToLock = [];
+  for(const g of groups){
+    if(g.recommended_keep && !locked.has(g.recommended_keep)){
+      newToLock.push(g.recommended_keep);
+    }
+  }
+  if(newToLock.length){
+    await setLocked(newToLock, true);
+  }
+  autoSelect();
+  updateChrome();
+  refreshLogIfOpen();
+}
+
+// Render
+function renderGroups(){
+  // Preserve scroll position so a single click (e.g. lock/unlock) doesn't
+  // scroll the user back to the top when we re-render the entire list.
+  const scrollY = window.scrollY;
+  let f=filter==='all'?groups:
+    filter==='lossless'?groups.filter(g=>g.files.some(f=>f.compression==='lossless')&&g.files.some(f=>f.compression==='lossy')):
+    groups.filter(g=>g.match_type===filter);
+  // Apply file type filter
+  if(activeTypes.size<7){
+    f=f.filter(g=>g.files.some(fi=>activeTypes.has(fi.file_type)));
+  }
+  if(!f.length){$('groupsArea').innerHTML='<div class="empty-state"><h3>No matches for this filter</h3></div>';return;}
+  $('groupsArea').innerHTML=f.map((g,i)=>`
+    <div class="group" data-gid="${g.group_id}" style="animation-delay:${Math.min(i*0.03,0.4)}s">
+      <div class="group-head">
+        <div class="group-left">
+          <span class="badge ${g.match_type==='exact'?'badge-exact':'badge-similar'}">${g.match_type}</span>
+          <span style="font-size:12px;color:var(--text-2);">${g.file_count} files</span>
+          ${g.file_count===2 && g.files.every(f=>f.file_type==='image')?`<button class="btn btn-outline btn-sm" style="padding:3px 10px;font-size:10px;" onclick="event.stopPropagation();openCompare(${g.group_id})">Compare</button>`:''}
+        </div>
+        <div class="group-meta">
+          <span>${fmtSize(g.total_size)}</span>
+          <span style="margin-left:12px" class="recov">${fmtSize(g.recoverable_size)} recoverable</span>
+          <button class="btn btn-danger btn-sm" style="margin-left:12px;padding:3px 10px;font-size:10px;" onclick="event.stopPropagation();deleteGroupDupes(${g.group_id})">Delete dupes</button>
+        </div>
+      </div>
+      <div class="group-files">${g.files.map(f=>renderFile(f,g)).join('')}</div>
+    </div>`).join('');
+
+  // Restore scroll position. requestAnimationFrame so the new DOM is laid
+  // out first before we try to scroll.
+  requestAnimationFrame(() => window.scrollTo(0, scrollY));
+}
+
+function renderFile(f,g){
+  const isBest=f.path===g.recommended_keep;
+  const isLocked=locked.has(f.path);
+  const isSel=selected.has(f.path) && !isLocked;  // locked = never deletable
+  // Build CSS classes — three exclusive visual states:
+  //   .is-locked  → green frame + LOCKED badge + no delete button
+  //   .is-del     → red frame + DELETE badge + X-pattern overlay
+  //   .is-best    → soft green hint (auto-pick, not yet locked)
+  let cls = '';
+  if(isLocked) cls = 'is-locked';
+  else if(isSel) cls = 'is-del';
+  else if(isBest) cls = 'is-best';
+  const isVid=['mp4','mkv','avi','mov','wmv','webm','flv','m4v','mpg','mpeg','3gp','ts','mts','vob','ogv'].some(x=>f.path.toLowerCase().endsWith('.'+x));
+  const isTextType = ['document','code'].includes(f.file_type);
+  const isAudio = f.file_type==='audio';
+  const isArchive = f.file_type==='archive';
+  const isOther = f.file_type==='other';
+  const needsDocCard = isTextType||isAudio||isArchive||isOther;
+
+  // Top-right status badge: LOCKED > DELETE > Best, in priority order.
+  let stag='';
+  if(isLocked)      stag='<div class="ftag ftag-tr ftag-locked">🔒 LOCKED</div>';
+  else if(isSel)    stag='<div class="ftag ftag-tr ftag-delete">DELETE</div>';
+  else if(isBest)   stag='<div class="ftag ftag-tr ftag-best">Best</div>';
+  const qtag=(!needsDocCard&&f.quality_score)?`<div class="ftag ftag-tl ftag-score">Q${f.quality_score}</div>`:'';
+  let ctag='';
+  if(f.compression==='lossless')ctag='<div class="ftag ftag-bl ftag-lossless">Lossless</div>';
+  else if(f.compression==='lossy')ctag='<div class="ftag ftag-bl ftag-lossy">Lossy</div>';
+  let simtag='';
+  if(g.match_type==='similar'&&f.similarity<100)simtag=`<div class="ftag ftag-br ftag-sim">${f.similarity}%</div>`;
+
+  // Lock toggle button — always visible, top-left corner of the card.
+  // Per-card lock-toggle button. Tooltip explicitly tells you what
+  // clicking will do so there's no guessing.
+  const lockTitle = isLocked
+    ? '🔒 Locked — click to unlock and allow deletion'
+    : '🔓 Unlocked — click to protect this file from deletion';
+  // Inline SVG icons for the lock button. Emoji 🔒/🔓 are nearly identical
+  // at small sizes — the open shackle is just a tiny notch that disappears.
+  // These SVGs have an obvious silhouette difference (closed vs offset
+  // shackle) and pair with different button colors for the two states.
+  const lockedSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  const unlockedSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>';
+  const lockIcon = isLocked ? lockedSvg : unlockedSvg;
+  const lockBtn = `<button class="btn-lock" type="button" aria-label="${lockTitle}" aria-pressed="${isLocked}" title="${lockTitle}" onclick="event.stopPropagation();toggleLock('${escA(f.path)}')">${lockIcon}</button>`;
+
+  // Icon class lookup
+  const iconLookup={'.docx':'docx','.doc':'docx','.pptx':'pptx','.ppt':'pptx','.xlsx':'xlsx','.xls':'xlsx','.csv':'csv','.pdf':'pdf','.txt':'txt','.md':'md','.json':'json','.html':'html','.htm':'html','.xml':'xml','.rtf':'txt','.log':'txt','.tsv':'csv','.odt':'odt','.ods':'xlsx','.odp':'pptx','.epub':'epub','.yaml':'yaml','.yml':'yaml','.toml':'yaml','.ini':'txt','.cfg':'txt','.sql':'sql','.tex':'tex','.py':'py','.js':'js','.ts':'ts','.jsx':'js','.tsx':'ts','.css':'css','.scss':'css','.sass':'css','.java':'java','.cpp':'cpp','.c':'cpp','.h':'cpp','.hpp':'cpp','.cs':'cpp','.swift':'swift','.go':'go','.rs':'rs','.rb':'rb','.php':'php','.sh':'sh','.bash':'sh','.zsh':'sh','.fish':'sh','.r':'rb','.lua':'py','.pl':'rb','.kt':'java','.vue':'js','.svelte':'js','.astro':'js','.mp3':'mp3','.wav':'wav','.flac':'flac','.aac':'aac','.ogg':'ogg','.m4a':'aac','.wma':'aac','.alac':'flac','.aiff':'wav','.aif':'wav','.opus':'ogg','.wv':'flac','.ape':'flac','.zip':'zip','.rar':'rar','.7z':'zip','.tar':'zip','.gz':'zip','.bz2':'zip','.xz':'zip','.tgz':'zip'};
+
+  // Thumbnail: image, video, or doc/code/audio/archive preview
+  let thumb;
+  if(needsDocCard) {
+    const ext=f.ext||'';
+    const typeName=ext.replace('.','').toUpperCase()||f.file_type.toUpperCase();
+    const iconCls=iconLookup[ext]||'default';
+    let previewContent='';
+    if(isAudio){
+      previewContent=f.duration?`<span style="color:var(--text-2);">Duration: ${fmtDur(f.duration)}</span>`:
+        '<span style="color:var(--text-3);font-style:italic;">Audio file</span>';
+    } else if(isArchive){
+      previewContent='<span style="color:var(--text-3);font-style:italic;">Archive</span>';
+    } else if(isOther){
+      previewContent='<span style="color:var(--text-3);font-style:italic;">Binary file</span>';
+    } else {
+      previewContent=f.text_preview?esc(f.text_preview):'<span style="color:var(--text-3);font-style:italic;">No text extracted</span>';
+    }
+    thumb=`<div class="fthumb-doc" onclick="event.stopPropagation();openLightbox('${escA(f.path)}',${g.group_id})">
+      <div class="fthumb-doc-type"><span class="doc-icon doc-icon-${iconCls}">${typeName.slice(0,4)}</span>${typeName}</div>
+      <div class="fthumb-doc-text">${previewContent}</div>
+    </div>`;
+  } else if(f.thumbnail) {
+    thumb=`<img src="${f.thumbnail}" alt="" loading="lazy" onclick="event.stopPropagation();openLightbox('${escA(f.path)}',${g.group_id})">`;
+  } else {
+    thumb=`<div class="fthumb-empty">${isVid?'Video':'Image'}</div>`;
+  }
+
+  const mod=f.modified?new Date(f.modified*1000).toLocaleDateString():'';
+  // Hide the inline Delete button entirely when locked — physically
+  // unclickable as a defense-in-depth measure on top of the server-side
+  // lock filter.
+  const delBtn = (!isBest && !isLocked)
+    ? `<button class="btn-del-inline" onclick="event.stopPropagation();deleteOne('${escA(f.path)}',${g.group_id})">Delete</button>`
+    : '';
+  // Cards toggle selection on click — but NOT for locked files (they're
+  // protected and can't be selected anyway).
+  const onClick = isLocked
+    ? ''
+    : `onclick="toggleFile('${escA(f.path)}',${f.size})"`;
+  return`<div class="fcard ${cls}" ${onClick} data-path="${escA(f.path)}">
+    ${lockBtn}
+    <div class="fthumb">${thumb}${stag}${qtag}${ctag}${simtag}</div>
+    <div class="fname">${esc(f.name)}</div>
+    <div class="fdir">${esc(f.dir)}</div>
+    <div class="fmeta"><span>${fmtSize(f.size)}</span>${f.dimensions?`<span>${f.dimensions}</span>`:''}${f.megapixels?`<span>${f.megapixels}MP</span>`:''}${f.duration?`<span>${fmtDur(f.duration)}</span>`:''}${f.word_count?`<span>${f.word_count.toLocaleString()} words</span>`:''}${mod?`<span>${mod}</span>`:''}</div>
+    ${f.source?`<div class="fsource">${esc(f.source)}</div>`:''}
+    <div class="factions" onclick="event.stopPropagation()">
+      <button class="btn btn-outline btn-sm" style="padding:3px 9px;font-size:10px;" onclick="openDetail('${escA(f.path)}',${g.group_id})">Details</button>
+      <button class="btn btn-outline btn-sm" style="padding:3px 9px;font-size:10px;" onclick="openFolder('${escA(f.path)}')">Reveal</button>
+      <button class="btn btn-outline btn-sm" style="padding:3px 9px;font-size:10px;" onclick="moveOne('${escA(f.path)}',${g.group_id})">Move</button>
+      ${delBtn}
+    </div>
+  </div>`;
+}
+
+// Move single file to chosen destination
+let moveTargetPath='';
+
+// ─── Card state update (perf-critical) ─────────────────────────────────
+// Mutates a single card in place rather than rebuilding the whole results
+// DOM. Used by toggleFile / toggleLock / setLocked so a click on one card
+// only updates that card. Without this, every click re-renders all 900+
+// groups via innerHTML — visible flicker, scroll jumps, and slow.
+//
+// The function knows about every state-dependent piece of a card:
+//   - root className (is-locked / is-del / is-best / pulse classes)
+//   - the onclick handler (cleared when locked, set otherwise)
+//   - the top-right badge (LOCKED / DELETE / Best, in priority order)
+//   - the lock button (aria-pressed, title, icon, click handler stays)
+//   - the inline Delete button (hidden when best or locked)
+const _LOCKED_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+const _UNLOCKED_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>';
+
+function updateCardState(path, opts){
+  // opts: { pulseLock: bool|null }  — null/undefined means no pulse
+  const card = document.querySelector(`.fcard[data-path="${CSS.escape(path)}"]`);
+  if(!card) return false;  // card not in DOM (filtered out, etc.)
+
+  // Resolve current state
+  // Find the group this file belongs to (for `recommended_keep` lookup)
+  let g = null, f = null;
+  outer: for(const gr of groups){
+    for(const fi of gr.files){
+      if(fi.path === path){ g = gr; f = fi; break outer; }
+    }
+  }
+  if(!g || !f) return false;
+
+  const isBest = f.path === g.recommended_keep;
+  const isLocked = locked.has(f.path);
+  const isSel = selected.has(f.path) && !isLocked;
+
+  // 1. Root class
+  // Preserve any classes that aren't part of state (none today, but
+  // future-proof) by replacing only our known state classes.
+  card.classList.remove('is-locked','is-del','is-best');
+  if(isLocked)      card.classList.add('is-locked');
+  else if(isSel)    card.classList.add('is-del');
+  else if(isBest)   card.classList.add('is-best');
+  // Pulse animation — applied here only when called individually. For
+  // bulk operations, updateCardStates handles pulse application in a
+  // single batched layout flush to avoid per-card thrash.
+  if(opts && (opts.pulseLock === true || opts.pulseLock === false)){
+    card.classList.remove('pulse-lock','pulse-unlock');
+    void card.offsetWidth;  // re-trigger animation
+    card.classList.add(opts.pulseLock ? 'pulse-lock' : 'pulse-unlock');
+  }
+
+  // 2. onclick handler — locked cards aren't clickable for selection
+  if(isLocked){
+    card.removeAttribute('onclick');
+  } else {
+    card.setAttribute('onclick', `toggleFile('${escA(f.path)}',${f.size})`);
+  }
+
+  // 3. Top-right badge
+  const thumb = card.querySelector('.fthumb');
+  if(thumb){
+    // Remove any existing top-right state badge
+    const existing = thumb.querySelector('.ftag-tr.ftag-locked, .ftag-tr.ftag-delete, .ftag-tr.ftag-best');
+    if(existing) existing.remove();
+    let badge = '';
+    if(isLocked)      badge = '<div class="ftag ftag-tr ftag-locked">🔒 LOCKED</div>';
+    else if(isSel)    badge = '<div class="ftag ftag-tr ftag-delete">DELETE</div>';
+    else if(isBest)   badge = '<div class="ftag ftag-tr ftag-best">Best</div>';
+    if(badge) thumb.insertAdjacentHTML('beforeend', badge);
+  }
+
+  // 4. Lock button — update aria + icon. The click handler doesn't change.
+  const lockBtn = card.querySelector('.btn-lock');
+  if(lockBtn){
+    const lockTitle = isLocked
+      ? '🔒 Locked — click to unlock and allow deletion'
+      : '🔓 Unlocked — click to protect this file from deletion';
+    lockBtn.setAttribute('aria-label', lockTitle);
+    lockBtn.setAttribute('aria-pressed', String(isLocked));
+    lockBtn.setAttribute('title', lockTitle);
+    lockBtn.innerHTML = isLocked ? _LOCKED_SVG : _UNLOCKED_SVG;
+  }
+
+  // 5. Inline Delete button — present only when not best AND not locked
+  const factions = card.querySelector('.factions');
+  if(factions){
+    const existingDel = factions.querySelector('.btn-del-inline');
+    const shouldHaveDel = !isBest && !isLocked;
+    if(shouldHaveDel && !existingDel){
+      factions.insertAdjacentHTML('beforeend',
+        `<button class="btn-del-inline" onclick="event.stopPropagation();deleteOne('${escA(f.path)}',${g.group_id})">Delete</button>`);
+    } else if(!shouldHaveDel && existingDel){
+      existingDel.remove();
+    }
+  }
+
+  return true;
+}
+
+// Update many cards in one go (for setLocked, autoSelect, clearSel).
+// When opts.pulseLock is set, batches the pulse-class application so the
+// animation re-triggers on every card without per-card layout thrash.
+function updateCardStates(paths, opts){
+  if(opts && (opts.pulseLock === true || opts.pulseLock === false)){
+    // Two-phase: 1) clear pulse classes from all affected cards and update
+    // base state, 2) force a single layout flush, 3) add pulse class to all.
+    const cards = [];
+    for(const p of paths){
+      const card = document.querySelector(`.fcard[data-path="${CSS.escape(p)}"]`);
+      if(card){
+        card.classList.remove('pulse-lock','pulse-unlock');
+        cards.push(card);
+      }
+      // Update state without applying pulse (pulse handled in phase 2)
+      updateCardState(p, null);
+    }
+    // Single layout flush for all cards at once
+    if(cards.length) void cards[0].offsetWidth;
+    // Phase 2: add pulse class to all cards in one batch
+    const pulseCls = opts.pulseLock ? 'pulse-lock' : 'pulse-unlock';
+    for(const card of cards) card.classList.add(pulseCls);
+  } else {
+    for(const p of paths){
+      updateCardState(p, opts);
+    }
+  }
+}
+
+function moveOne(path,gid){
+  moveTargetPath=path;
+  // Open browser in pick-destination mode
+  bCurPath='';bSelPath_='';
+  $('bOver').classList.add('open');
+  $('bOver').dataset.mode='move';
+  $('bOver').querySelector('.bbox-top h3').textContent='Move file to...';
+  browseTo('');
+  updateBB();
+}
+
+function executeMove(destFolder){
+  if(!moveTargetPath||!destFolder)return;
+  fetch('/api/move-one',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({source:moveTargetPath,dest_folder:destFolder}),
+  }).then(r=>r.json()).then(d=>{
+    if(d.error){toast('Move failed: '+d.error);return;}
+    const oldPath=moveTargetPath;
+    const newPath=d.new_path;
+    // Update groups with new path
+    for(const g of groups){
+      for(const f of g.files){
+        if(f.path===oldPath){
+          f.path=newPath;
+          f.dir=newPath.substring(0,newPath.length-f.name.length-1);
+        }
+      }
+    }
+    if(selected.has(oldPath)){selected.delete(oldPath);selected.add(newPath);}
+    // Lock transfer is handled atomically server-side now (api_move_one
+    // moves the lock entry as part of the same operation, so a crash
+    // mid-move can't leave a phantom lock). We just mirror the server's
+    // updated state on the client.
+    if(d.lock_transferred){
+      locked.delete(oldPath);
+      locked.add(newPath);
+    }
+    moveTargetPath='';
+    closeBrowser();
+    $('bOver').dataset.mode='';
+    $('bOver').querySelector('.bbox-top h3').textContent='Select Folder';
+    toast('File moved');
+    updateUI();
+    refreshLogIfOpen();
+  }).catch(()=>{toast('Move failed');moveTargetPath='';});
+}
+
+// Delete single file
+function deleteOne(path,gid){
+  // The Delete button is hidden on locked files, but a malformed click
+  // could still get here. Belt-and-suspenders.
+  if(locked.has(path)){
+    toast('This file is locked. Unlock it first.');
+    return;
+  }
+  if(!confirm('Move this file to trash?'))return;
+  fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({files:[path],mode:'trash'})}).then(r=>r.json()).then(d=>{
+    const gone=new Set(d.deleted||[]);
+    for(const g of groups)g.files=g.files.filter(f=>!gone.has(f.path));
+    groups=groups.filter(g=>g.files.length>=2);
+    selected.delete(path);
+    recomputeStats();
+    reportDeleteResult(d, 'moved to trash');
+    updateUI();
+    refreshLogIfOpen();
+  }).catch(e => {
+    console.error('Delete failed:', e);
+    toast('Delete failed — check console for details');
+  });
+}
+
+// Delete all dupes in a single group (keeps best, skips locked)
+function deleteGroupDupes(gid){
+  const g=groups.find(x=>x.group_id===gid);
+  if(!g)return;
+  // Filter out: the recommended-keep file AND any locked file in the group.
+  const dupes=g.files
+    .filter(f => f.path !== g.recommended_keep && !locked.has(f.path))
+    .map(f => f.path);
+  const lockedCount = g.files.filter(f => locked.has(f.path)).length;
+  if(!dupes.length){
+    toast(lockedCount > 0
+      ? `All non-best files in this group are locked.`
+      : 'Nothing to delete');
+    return;
+  }
+  const skipped = lockedCount > 0 ? ` (${lockedCount} locked file${lockedCount===1?'':'s'} skipped)` : '';
+  if(!confirm(`Move ${dupes.length} duplicate${dupes.length>1?'s':''} to trash? The best version will be kept.${skipped}`))return;
+  fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({files:dupes,mode:'trash'})}).then(r=>r.json()).then(d=>{
+    const gone=new Set(d.deleted||[]);
+    for(const g of groups)g.files=g.files.filter(f=>!gone.has(f.path));
+    groups=groups.filter(g=>g.files.length>=2);
+    gone.forEach(p=>selected.delete(p));
+    recomputeStats();
+    reportDeleteResult(d, 'trashed');
+    updateUI();
+    refreshLogIfOpen();
+  }).catch(e => {
+    console.error('Delete failed:', e);
+    toast('Delete failed — check console for details');
+  });
+}
+
+// Bulk delete all non-best duplicates (skips locked)
+function bulkDeleteDupes(){
+  const toDelete=[];
+  let lockedSkipped = 0;
+  for(const g of groups) for(const f of g.files){
+    if(f.path === g.recommended_keep) continue;
+    if(locked.has(f.path)){ lockedSkipped++; continue; }
+    toDelete.push(f.path);
+  }
+  if(!toDelete.length){
+    toast(lockedSkipped > 0
+      ? `All duplicates are locked (${lockedSkipped} files protected)`
+      : 'Nothing to delete');
+    return;
+  }
+  actionMode='trash';selected=new Set(toDelete);
+  const lockedNote = lockedSkipped > 0
+    ? ` <br><span style="color:var(--keep);font-size:13px;">🔒 ${lockedSkipped} locked file${lockedSkipped===1?'':'s'} will be skipped.</span>`
+    : '';
+  $('mTitle').textContent='Bulk Delete Duplicates';
+  $('mMsg').innerHTML=`Move <strong>${toDelete.length}</strong> duplicate${toDelete.length>1?'s':''} to trash? The highest quality version of each group will be kept.${lockedNote}`;
+  $('mMoveInput').style.display='none';
+  $('mConfirm').textContent='Move to Trash';
+  $('mOver').classList.add('open');
+}
+
+// Selection
+function toggleFile(p){
+  // Locked files are never selectable for deletion. Defense in depth: the
+  // card click handler is also gated, but we double-check here.
+  if(locked.has(p)) {
+    toast('This file is locked. Unlock it first.');
+    return;
+  }
+  if(selected.has(p)){
+    selected.delete(p);
+  } else {
+    selected.add(p);
+  }
+  // Targeted: update only this one card, then refresh chrome.
+  updateCardState(p);
+  updateChrome();
+}
+function autoSelect(){
+  const changedPaths = [];
+  // Track everything that's about to change so we can update only those cards.
+  for(const g of groups) for(const f of g.files){
+    const wasSelected = selected.has(f.path);
+    const shouldSelect = (f.path !== g.recommended_keep && !locked.has(f.path));
+    if(wasSelected !== shouldSelect) changedPaths.push(f.path);
+  }
+  selected.clear();
+  for(const g of groups) for(const f of g.files){
+    if(f.path !== g.recommended_keep && !locked.has(f.path)) selected.add(f.path);
+  }
+  // Targeted card updates instead of full re-render — even with 900 groups
+  // we only repaint the cards whose state actually changed.
+  updateCardStates(changedPaths);
+  updateChrome();
+  toast(`Selected ${selected.size} duplicates`);
+}
+function clearSel(){
+  const changedPaths = Array.from(selected);
+  selected.clear();
+  updateCardStates(changedPaths);
+  updateChrome();
+}
+
+// updateChrome — refresh action bar, lock buttons, banner. Cheap. Doesn't
+// touch the card DOM. Use this whenever the cards themselves haven't
+// changed shape (e.g. you mutated state and want chrome to reflect it).
+function updateChrome(){
+  let sz = 0;
+  for(const g of groups) for(const f of g.files){
+    if(selected.has(f.path)) sz += f.size;
+  }
+  $('selCount').textContent = selected.size;
+  $('selSize').textContent = fmtSize(sz);
+  $('actBar').classList.toggle('show', selected.size > 0);
+
+  const lockedNote = $('lockedNote');
+  if(lockedNote){
+    lockedNote.textContent = locked.size > 0
+      ? `🔒 ${locked.size} locked & protected`
+      : '';
+  }
+
+  // Lock all best / Unlock all buttons — live counts + disabled states.
+  const stats = bestLockStats();
+  const unlockedBest = stats.total - stats.lockedCount;
+  const btnLock = $('btnLockAllBest');
+  const btnUnlock = $('btnUnlockAll');
+  if(btnLock){
+    if(unlockedBest > 0){
+      btnLock.textContent = `🔒 Lock all best (${unlockedBest})`;
+      btnLock.disabled = false;
+      btnLock.style.opacity = '1';
+      btnLock.style.cursor = 'pointer';
+      btnLock.title = `Lock the ${unlockedBest} best file${unlockedBest===1?'':'s'} that ${unlockedBest===1?'isn\'t':'aren\'t'} locked yet`;
+    } else {
+      btnLock.textContent = `🔒 All best locked`;
+      btnLock.disabled = true;
+      btnLock.style.opacity = '0.5';
+      btnLock.style.cursor = 'not-allowed';
+      btnLock.title = 'Every best file is already locked';
+    }
+  }
+  if(btnUnlock){
+    if(locked.size > 0){
+      btnUnlock.textContent = `🔓 Unlock all (${locked.size})`;
+      btnUnlock.disabled = false;
+      btnUnlock.style.opacity = '1';
+      btnUnlock.style.cursor = 'pointer';
+      btnUnlock.title = `Unlock all ${locked.size} locked file${locked.size===1?'':'s'}`;
+    } else {
+      btnUnlock.textContent = `🔓 Nothing locked`;
+      btnUnlock.disabled = true;
+      btnUnlock.style.opacity = '0.5';
+      btnUnlock.style.cursor = 'not-allowed';
+      btnUnlock.title = 'No locked files to unlock';
+    }
+  }
+
+  // Lock status banner — persistent readout above the groups area.
+  const banner = $('lockBanner');
+  if(banner){
+    if(groups.length === 0){
+      banner.style.display = 'none';
+    } else if(locked.size === 0){
+      banner.className = 'lock-banner empty';
+      banner.innerHTML = `
+        <span class="lock-banner-icon">🔓</span>
+        <span class="lock-banner-text"><strong>No files locked.</strong> Click "🔒 Lock all best" to protect every recommended-keep file from accidental deletion.</span>
+      `;
+      banner.style.display = 'flex';
+    } else {
+      banner.className = 'lock-banner';
+      banner.innerHTML = `
+        <span class="lock-banner-icon">🔒</span>
+        <span class="lock-banner-text"><strong>${locked.size}</strong> file${locked.size===1?'':'s'} locked &amp; protected from deletion.${
+          stats.lockedCount === stats.total && stats.total > 0
+            ? ' All best files are locked.'
+            : (unlockedBest > 0 ? ` (${unlockedBest} best file${unlockedBest===1?'':'s'} not yet locked.)` : '')
+        }</span>
+      `;
+      banner.style.display = 'flex';
+    }
+  }
+}
+
+// updateUI — full redraw. Use only when the GROUPS list itself has
+// structurally changed (after deletes, after a new scan, after filter
+// change). Otherwise prefer updateCardStates + updateChrome which are
+// far cheaper.
+function updateUI(){
+  renderGroups();
+  updateChrome();
+}
+function setFilter(f,el){filter=f;document.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');updateUI();}
+
+function toggleTypeDropdown(e){
+  e.stopPropagation();
+  const dd=$('typeDropdown');
+  dd.classList.toggle('open');
+  if(dd.classList.contains('open')){
+    const close=()=>{dd.classList.remove('open');document.removeEventListener('click',close);};
+    setTimeout(()=>document.addEventListener('click',close),0);
+  }
+}
+
+function applyTypeFilter(ev){
+  const allCb=document.querySelector('#typeDropdown input[data-ft="all"]');
+  const typeCbs=document.querySelectorAll('#typeDropdown input[data-ft]:not([data-ft="all"])');
+  if(ev && ev.target && ev.target.dataset.ft==='all'){
+    typeCbs.forEach(cb=>cb.checked=allCb.checked);
+  } else {
+    const allChecked=[...typeCbs].every(cb=>cb.checked);
+    allCb.checked=allChecked;
+  }
+  activeTypes.clear();
+  typeCbs.forEach(cb=>{if(cb.checked)activeTypes.add(cb.dataset.ft);});
+  if(!activeTypes.size){activeTypes=new Set(['image','video','audio','document','code','archive','other']);allCb.checked=true;typeCbs.forEach(cb=>cb.checked=true);}
+  updateUI();
+}
+
+// Detail
+function openDetail(p,gid){
+  const g=groups.find(x=>x.group_id===gid);const f=g?.files.find(x=>x.path===p);if(!f)return;
+  const isVid=['mp4','mkv','avi','mov','wmv','webm','flv','m4v'].some(x=>p.toLowerCase().endsWith('.'+x));
+  const isDoc=f.file_type==='document';
+  const url=`/original?path=${encodeURIComponent(p)}`;
+
+  if(isDoc){
+    const preview=f.text_preview||'No preview available';
+    $('detailPreview').innerHTML=`<div style="max-width:640px;width:100%;background:var(--white);border:1px solid var(--border);border-radius:var(--r-md);padding:28px 32px;box-shadow:var(--shadow-lg);max-height:85vh;overflow-y:auto;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.7;color:var(--text-2);white-space:pre-wrap;word-break:break-word;">${esc(preview)}</div>
+    </div>`;
+  } else if(isVid){
+    $('detailPreview').innerHTML=`<video src="${url}" controls autoplay style="max-width:100%;max-height:85vh;border-radius:var(--r);box-shadow:var(--shadow-lg);">`;
+  } else {
+    $('detailPreview').innerHTML=`<img src="${url}" style="max-width:100%;max-height:85vh;border-radius:var(--r);box-shadow:var(--shadow-lg);">`;
+  }
+
+  let h=`<div class="dsection"><h4>File</h4>
+    <div class="drow"><span class="lbl">Name</span><span class="val">${esc(f.name)}</span></div>
+    <div class="drow"><span class="lbl">Type</span><span class="val">${f.file_type}</span></div>
+    <div class="drow"><span class="lbl">Size</span><span class="val">${fmtSize(f.size)}</span></div>
+    ${f.dimensions?`<div class="drow"><span class="lbl">Dimensions</span><span class="val">${f.dimensions}</span></div>`:''}
+    ${f.megapixels?`<div class="drow"><span class="lbl">Megapixels</span><span class="val">${f.megapixels} MP</span></div>`:''}
+    ${f.duration?`<div class="drow"><span class="lbl">Duration</span><span class="val">${fmtDur(f.duration)}</span></div>`:''}
+    ${f.word_count?`<div class="drow"><span class="lbl">Words</span><span class="val">${f.word_count.toLocaleString()}</span></div>`:''}
+    <div class="drow"><span class="lbl">Modified</span><span class="val">${f.modified?new Date(f.modified*1000).toLocaleString():'-'}</span></div>
+    <div class="drow"><span class="lbl">Format</span><span class="val">${f.ext||'-'}</span></div>
+    ${f.compression?`<div class="drow"><span class="lbl">Compression</span><span class="val" style="color:${f.compression==='lossless'?'var(--keep)':f.compression==='lossy'?'var(--lossy)':'var(--text)'}">${f.compression}</span></div>`:''}
+  </div>`;
+  if(!isDoc&&(f.quality_score||f.sharpness)){
+    h+=`<div class="dsection"><h4>Quality</h4>
+      <div class="drow"><span class="lbl">Score</span><span class="val">${f.quality_score}/100</span></div>
+      ${f.sharpness?`<div class="drow"><span class="lbl">Sharpness</span><span class="val">${f.sharpness.toFixed(1)}</span></div>`:''}
+      ${f.bits_per_pixel?`<div class="drow"><span class="lbl">Bits/Pixel</span><span class="val">${f.bits_per_pixel.toFixed(2)}</span></div>`:''}
+      ${f.similarity<100?`<div class="drow"><span class="lbl">Similarity</span><span class="val">${f.similarity}%</span></div>`:''}
+    </div>`;
+  }
+  if(isDoc&&f.similarity<100){
+    h+=`<div class="dsection"><h4>Match</h4>
+      <div class="drow"><span class="lbl">Content Similarity</span><span class="val">${f.similarity}%</span></div>
+    </div>`;
+  }
+  if(f.source)h+=`<div class="dsection"><h4>Source</h4><div class="drow"><span class="lbl">Origin</span><span class="val" style="color:var(--text)">${esc(f.source)}</span></div></div>`;
+  const ex=f.exif||{};
+  if(Object.keys(ex).length){h+=`<div class="dsection"><h4>EXIF</h4>`;const lb={camera_make:'Make',camera_model:'Model',date_taken:'Date',software:'Software',iso:'ISO',aperture:'Aperture',shutter_speed:'Shutter',focal_length:'Focal Length',lens:'Lens',has_gps:'GPS'};for(const[k,v]of Object.entries(ex)){h+=`<div class="drow"><span class="lbl">${esc(lb[k]||k)}</span><span class="val">${esc(String(v))}</span></div>`;}h+=`</div>`;}
+  h+=`<div class="dsection"><h4>Path</h4><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-2);word-break:break-all;line-height:1.5;">${esc(f.path)}</div></div>`;
+  $('detailInfo').innerHTML=h;$('detailOver').classList.add('open');
+}
+// Lightbox preview
+function openLightbox(path,gid){
+  const g=groups.find(x=>x.group_id===gid);
+  const f=g?.files.find(x=>x.path===path);
+  if(!f)return;
+
+  const isVid=['mp4','mkv','avi','mov','wmv','webm','flv','m4v','mpg','mpeg'].some(x=>path.toLowerCase().endsWith('.'+x));
+  const isAudio=['mp3','wav','flac','aac','ogg','m4a','wma','aiff','opus'].some(x=>path.toLowerCase().endsWith('.'+x));
+  const isTextType=['document','code'].includes(f.file_type);
+  const url=`/original?path=${encodeURIComponent(path)}`;
+
+  if(isTextType){
+    $('lightboxContent').innerHTML=`<div class="lightbox-doc">${esc(f.text_preview||'No preview available')}</div>`;
+  } else if(isAudio){
+    $('lightboxContent').innerHTML=`<div class="lightbox-doc" style="text-align:center;padding:48px 32px;"><div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--text);margin-bottom:16px;">${esc(f.name)}</div><audio src="${url}" controls autoplay style="width:100%;max-width:400px;"></audio></div>`;
+  } else if(isVid){
+    $('lightboxContent').innerHTML=`<video src="${url}" controls autoplay onclick="event.stopPropagation()"></video>`;
+  } else {
+    $('lightboxContent').innerHTML=`<img src="${url}" onclick="event.stopPropagation()">`;
+  }
+
+  // Info bar
+  const parts=[f.name,fmtSize(f.size)];
+  if(f.dimensions)parts.push(f.dimensions);
+  if(f.duration)parts.push(fmtDur(f.duration));
+  if(f.word_count)parts.push(f.word_count.toLocaleString()+' words');
+  $('lightboxInfo').innerHTML=parts.map(p=>`<span>${esc(String(p))}</span>`).join('');
+
+  $('lightbox').classList.add('open');
+}
+
+function closeLightbox(){
+  $('lightbox').classList.remove('open');
+  $('lightboxContent').innerHTML='';
+}
+
+function closeDetail(){$('detailOver').classList.remove('open');}
+
+// Compare
+function openCompare(gid){
+  const g=groups.find(x=>x.group_id===gid);if(!g||g.files.length<2)return;
+  const f1=g.files[0],f2=g.files[1];const u1=`/original?path=${encodeURIComponent(f1.path)}`,u2=`/original?path=${encodeURIComponent(f2.path)}`;
+  $('compareBox').innerHTML=`<img id="cL" src="${u1}"><div class="compare-clip" id="cClip"><img id="cR" src="${u2}"></div><div class="compare-line" id="cLine"></div>`;
+  $('compareLabels').innerHTML=`<span class="compare-lbl">${esc(f1.name)} (${fmtSize(f1.size)})</span><span class="compare-lbl">${esc(f2.name)} (${fmtSize(f2.size)})</span>`;
+  $('compareOver').classList.add('open');
+  const lImg=$('cL');lImg.onload=()=>{
+    const w=lImg.offsetWidth,clip=$('cClip'),line=$('cLine'),rImg=$('cR');rImg.style.width=w+'px';
+    let pos=w/2;clip.style.width=pos+'px';line.style.left=pos+'px';let drag=false;
+    const box=$('compareBox');
+    box.onmousedown=e=>{drag=true;mv(e);};document.onmouseup=()=>drag=false;document.onmousemove=e=>{if(drag)mv(e);};
+    function mv(e){const r=box.getBoundingClientRect();let x=Math.max(0,Math.min(w,e.clientX-r.left));clip.style.width=x+'px';line.style.left=x+'px';}
+  };
+}
+function closeCompare(){$('compareOver').classList.remove('open');}
+
+// Delete/Move
+function showDelModal(mode){
+  // First-time warning for permanent delete. We require the user to
+  // explicitly acknowledge the risk, persisted so it only fires once.
+  // This is the user's documented acceptance that they're responsible
+  // for what they're about to do.
+  if(mode==='permanent' && !localStorage.getItem('peanut_perm_delete_ack')){
+    showFirstTimePermDeleteWarning();
+    return;
+  }
+  actionMode=mode;$('mMoveInput').style.display='none';const n=selected.size;
+  if(mode==='trash'){$('mTitle').textContent='Move to Trash';$('mMsg').innerHTML=`Move <strong>${n}</strong> file${n>1?'s':''} to trash? You can restore them later.`;$('mConfirm').textContent='Move to Trash';}
+  else{$('mTitle').textContent='Delete Permanently';$('mMsg').innerHTML=`Permanently delete <strong>${n}</strong> file${n>1?'s':''}? This cannot be undone.`;$('mConfirm').textContent='Delete';}
+  $('mOver').classList.add('open');
+}
+
+function showFirstTimePermDeleteWarning(){
+  // Build a custom modal for the one-time acknowledgment. We don't want
+  // a `confirm()` here because it's bypassable in user scripts and
+  // doesn't render the gravity of what's happening.
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:99998;';
+  overlay.innerHTML = `
+    <div style="background:#fff;max-width:520px;padding:32px;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,0.3);font-family:system-ui,-apple-system,sans-serif;">
+      <div style="font-size:48px;text-align:center;margin-bottom:12px;">⚠️</div>
+      <h2 style="margin:0 0 16px 0;font-size:22px;color:#222;text-align:center;">Before you permanently delete</h2>
+      <p style="line-height:1.6;color:#444;margin:0 0 12px 0;">
+        Permanent delete <strong>bypasses your Trash</strong>. The files will be gone forever — no undo, no recovery.
+      </p>
+      <p style="line-height:1.6;color:#444;margin:0 0 12px 0;">
+        Peanut does its best to identify duplicates correctly, but it can be wrong. <strong>You are solely responsible for verifying which files to delete.</strong> The author assumes no responsibility for any data loss that results from your decisions.
+      </p>
+      <p style="line-height:1.6;color:#444;margin:0 0 20px 0;">
+        If you're not 100% sure, use <strong>Move to Trash</strong> instead — files there are recoverable.
+      </p>
+      <label style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:#f7f7f5;border-radius:6px;cursor:pointer;">
+        <input type="checkbox" id="permDelAck" style="margin-top:3px;flex-shrink:0;">
+        <span style="line-height:1.5;color:#222;font-size:14px;">
+          I understand permanent delete is irreversible, I have backups of any files I care about, and I accept full responsibility for what gets deleted.
+        </span>
+      </label>
+      <div style="display:flex;gap:8px;margin-top:20px;">
+        <button id="permDelCancel" style="flex:1;padding:10px 16px;border:1px solid #ddd;background:#fff;border-radius:6px;font-size:14px;cursor:pointer;">Cancel</button>
+        <button id="permDelProceed" style="flex:1;padding:10px 16px;border:0;background:#cc0a0a;color:#fff;border-radius:6px;font-size:14px;cursor:pointer;opacity:0.4;" disabled>I understand, continue</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const ack = overlay.querySelector('#permDelAck');
+  const proceed = overlay.querySelector('#permDelProceed');
+  const cancel = overlay.querySelector('#permDelCancel');
+  ack.addEventListener('change', () => {
+    proceed.disabled = !ack.checked;
+    proceed.style.opacity = ack.checked ? '1' : '0.4';
+    proceed.style.cursor = ack.checked ? 'pointer' : 'not-allowed';
+  });
+  cancel.addEventListener('click', () => overlay.remove());
+  proceed.addEventListener('click', () => {
+    if (!ack.checked) return;
+    // Persist acknowledgment with timestamp for accountability
+    localStorage.setItem('peanut_perm_delete_ack',
+                         JSON.stringify({acknowledged_at: new Date().toISOString()}));
+    overlay.remove();
+    showDelModal('permanent');  // Now proceed to the normal flow
+  });
+}
+function showMoveModal(){actionMode='move';$('mTitle').textContent='Move to Folder';$('mMsg').innerHTML=`Move <strong>${selected.size}</strong> file${selected.size>1?'s':''} to a review folder:`;$('mMoveInput').style.display='block';$('mMovePath').value='~/Peanut_Review';$('mConfirm').textContent='Move';$('mOver').classList.add('open');}
+function closeModal(){$('mOver').classList.remove('open');}
+function execAction(){
+  closeModal();const files=Array.from(selected);
+  const body=actionMode==='move'?{files,mode:'move',move_to:$('mMovePath').value||'~/Peanut_Review'}:{files,mode:actionMode};
+  fetch('/api/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(r=>r.json()).then(d=>{
+    const gone=new Set([...(d.deleted||[]),...(d.moved||[])]);
+    for(const g of groups)g.files=g.files.filter(f=>!gone.has(f.path));
+    groups=groups.filter(g=>g.files.length>=2);
+    selected.clear();
+    recomputeStats();
+    reportDeleteResult(d, actionMode==='move'?'moved':'removed');
+    updateUI();
+    refreshLogIfOpen();
+  }).catch(e => {
+    console.error('Action failed:', e);
+    toast('Action failed — check console for details');
+  });
+}
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  if(e.key==='Escape'){closeLightbox();closeDetail();closeCompare();closeModal();closeBrowser();
+    // Also close log panel if it's open
+    const logO = $('logOverlay');
+    if(logO && logO.classList.contains('open')) logO.classList.remove('open');
+    return;
+  }
+  // L key: toggle the action log. Works any time (not gated on having groups).
+  if((e.key==='l'||e.key==='L') && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    toggleLogPanel();
+    return;
+  }
+  if(!groups.length)return;
+  const cards=document.querySelectorAll('.group');if(!cards.length)return;
+  if(e.key==='j'||e.key==='ArrowDown'){e.preventDefault();focusedGroup=Math.min(focusedGroup+1,cards.length-1);cards[focusedGroup]?.scrollIntoView({behavior:'smooth',block:'center'});cards.forEach((c,i)=>c.style.boxShadow=i===focusedGroup?'0 0 0 2px var(--text)':'');}
+  if(e.key==='k'||e.key==='ArrowUp'){e.preventDefault();focusedGroup=Math.max(focusedGroup-1,0);cards[focusedGroup]?.scrollIntoView({behavior:'smooth',block:'center'});cards.forEach((c,i)=>c.style.boxShadow=i===focusedGroup?'0 0 0 2px var(--text)':'');}
+  if(e.key==='d'&&focusedGroup>=0){
+    const gid=cards[focusedGroup]?.dataset.gid;
+    const g=groups.find(x=>x.group_id==gid);
+    if(g){
+      const changed=[];
+      for(const f of g.files){
+        if(f.path!==g.recommended_keep && !locked.has(f.path) && !selected.has(f.path)){
+          selected.add(f.path);
+          changed.push(f.path);
+        }
+      }
+      updateCardStates(changed);
+      updateChrome();
+      toast('Marked for deletion');
+    }
+  }
+  if(e.key===' '&&focusedGroup>=0){
+    e.preventDefault();
+    const gid=cards[focusedGroup]?.dataset.gid;
+    const g=groups.find(x=>x.group_id==gid);
+    if(g){
+      const nb=g.files.filter(f=>f.path!==g.recommended_keep && !locked.has(f.path));
+      const all=nb.every(f=>selected.has(f.path));
+      const changed=[];
+      nb.forEach(f=>{
+        if(all){ selected.delete(f.path); changed.push(f.path); }
+        else if(!selected.has(f.path)){ selected.add(f.path); changed.push(f.path); }
+      });
+      updateCardStates(changed);
+      updateChrome();
+    }
+  }
+  if(e.key==='e'&&focusedGroup>=0){const gid=cards[focusedGroup]?.dataset.gid;const g=groups.find(x=>x.group_id==gid);if(g&&g.files[0])openDetail(g.files[0].path,g.group_id);}
+});
+
+function openFolder(p){
+  fetch('/api/open-folder',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path:p})})
+    .then(r=>r.json())
+    .then(d=>{if(d.error)toast('Could not reveal file');})
+    .catch(()=>toast('Could not reveal file'));
+}
+
+
+// Auto-scan check
+// Set the dropzone hint based on environment. pywebview takes a moment
+// to inject window.pywebview after DOMContentLoaded, so we listen for
+// the pywebviewready event (fired when the bridge is available) and
+// also fall back to a delayed check.
+function updateDropzoneHint(){
+  const hint = $('dropzoneHint');
+  if(!hint) return;
+  if(isNativeApp()){
+    hint.textContent = 'Drag folders from Finder, Explorer, or Files — or click to browse';
+  } else {
+    hint.innerHTML = 'Click to browse, or paste the full path below. <span style="opacity:0.7;">(Browser drag-and-drop has limitations — for full drag-and-drop, use the desktop app.)</span>';
+  }
+}
+window.addEventListener('pywebviewready', updateDropzoneHint);
+// Fallback if pywebview event doesn't fire (browser context, or already fired)
+setTimeout(updateDropzoneHint, 800);
+
+fetch('/api/results').then(r=>r.json()).then(d=>{
+  if(d.state==='scanning'){
+    $('viewLanding').style.display='none';
+    $('viewScanning').style.display='flex';
+    const es = new EventSource('/api/stream');
+    es.onmessage = e => {
+      const m = JSON.parse(e.data);
+      if(m.event==='status' || m.event==='progress'){
+        $('scanMsg').textContent = m.data.message || '';
+        if(m.data.total) $('scanProgress').style.width = Math.round(m.data.current/m.data.total*100) + '%';
+      } else if(m.event==='group'){
+        groups.push(m.data);
+        liveGroupCount++;
+        $('scanLive').innerHTML = `Groups found: <strong>${liveGroupCount}</strong>`;
+      } else if(m.event==='complete'){
+        es.close();
+        stats = m.data.stats || {};
+        showResults();
+      } else if(m.event==='error'){
+        es.close();
+        const phase = $('scanPhase'); const msg = $('scanMsg');
+        if(phase) phase.textContent = 'Scan failed';
+        if(msg){
+          msg.innerHTML = `<div style="color:#CC0A0A;font-weight:500;margin-bottom:8px;">${esc(m.data.message || 'Unknown error')}</div>` +
+            `<div style="font-size:12px;color:var(--text-3);">Press <span class="kbd" style="display:inline-block;background:rgba(0,0,0,0.08);color:var(--text-2);">L</span> to view the action log for details.</div>`;
+        }
+      }
+    };
+    es.onerror = () => es.close();
+  } else if(d.state==='complete' && d.groups.length){
+    groups = d.groups;
+    stats = d.stats;
+    $('viewLanding').style.display = 'none';
+    showResults();
+  } else if(d.state==='error'){
+    // Server has a recorded scan error from before this page load. Show
+    // it on the landing screen as a banner instead of silently hiding it.
+    if(d.error){
+      setTimeout(() => toast(`Last scan failed: ${d.error}`, 6000), 500);
+    }
+  }
+});
+
+// ─── Easter eggs ──────────────────────────────────────────────────────────
+// (1) DevTools console greeting
+(function(){
+  const styles = {
+    title:    'font:600 18px ui-monospace,monospace;color:#222;',
+    sub:      'font:14px ui-monospace,monospace;color:#666;',
+    label:    'font:12px ui-monospace,monospace;color:#999;',
+    contact:  'font:13px ui-monospace,monospace;color:#222;',
+  };
+  console.log('%c🥜 hey. you opened devtools.', styles.title);
+  console.log('%c   peanut is my dog\'s name, fyi. and i love peanut.', styles.sub);
+  console.log('%c ', styles.label);
+  console.log('%c   — cody browne', styles.contact);
+  console.log('%c     github.com/cbrwe', styles.contact);
+  console.log('%c     ig: @codybrowne', styles.contact);
+  console.log('%c     cbrwe@proton.me', styles.contact);
+  console.log('%c     text: (808) 301-3339', styles.contact);
+  console.log('%c ', styles.label);
+})();
+
+// (2) Konami code: ↑ ↑ ↓ ↓ ← → ← → B A → celebrates on the landing screen
+(function(){
+  const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown',
+               'ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+  let pos = 0;
+  document.addEventListener('keydown', (e) => {
+    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    if (key === seq[pos]) {
+      pos++;
+      if (pos === seq.length) {
+        pos = 0;
+        triggerKonami();
+      }
+    } else {
+      pos = (key === seq[0]) ? 1 : 0;
+    }
+  });
+  function triggerKonami(){
+    // Make it rain peanuts. Pure CSS animation, removed after 4s.
+    const layer = document.createElement('div');
+    layer.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:99999;overflow:hidden;';
+    for (let i = 0; i < 30; i++) {
+      const p = document.createElement('div');
+      const left = Math.random() * 100;
+      const delay = Math.random() * 1.5;
+      const dur = 2 + Math.random() * 1.5;
+      const rot = Math.random() * 720 - 360;
+      p.textContent = '🥜';
+      p.style.cssText = `position:absolute;top:-40px;left:${left}%;font-size:${24+Math.random()*24}px;animation:peanutFall ${dur}s ${delay}s linear forwards;--rot:${rot}deg;`;
+      layer.appendChild(p);
+    }
+    document.body.appendChild(layer);
+    setTimeout(() => layer.remove(), 5000);
+  }
+  // Inject the keyframes once
+  const style = document.createElement('style');
+  style.textContent = '@keyframes peanutFall{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(110vh) rotate(var(--rot,360deg))}}';
+  document.head.appendChild(style);
+})();
+
+// (3) Type "peanut" anywhere on the landing screen and the dropzone wiggles
+(function(){
+  const target = 'peanut';
+  let buf = '';
+  document.addEventListener('keydown', (e) => {
+    // Only on the landing view; ignore typing in inputs
+    if (e.target.matches('input,textarea')) return;
+    if ($('viewLanding') && $('viewLanding').style.display === 'none') return;
+    if (e.key.length !== 1) return;
+    buf = (buf + e.key.toLowerCase()).slice(-target.length);
+    if (buf === target) {
+      buf = '';
+      const dz = document.getElementById('dropzone');
+      if (dz) {
+        dz.classList.remove('peanut-wiggle');
+        // Force reflow so the animation restarts
+        void dz.offsetWidth;
+        dz.classList.add('peanut-wiggle');
+        setTimeout(() => dz.classList.remove('peanut-wiggle'), 800);
+      }
+    }
+  });
+  const style = document.createElement('style');
+  style.textContent = '@keyframes peanutWiggle{0%,100%{transform:translateX(0) rotate(0)}15%{transform:translateX(-8px) rotate(-2deg)}30%{transform:translateX(8px) rotate(2deg)}45%{transform:translateX(-6px) rotate(-1.5deg)}60%{transform:translateX(6px) rotate(1.5deg)}75%{transform:translateX(-3px) rotate(-0.5deg)}}.peanut-wiggle{animation:peanutWiggle 0.7s ease-in-out;}';
+  document.head.appendChild(style);
+})();
+</script>
+</body>
+</html>

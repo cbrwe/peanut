@@ -1,0 +1,122 @@
+name: Build and Release
+
+# Triggered by pushing a version tag like `v1.0.0`. Builds Peanut on
+# macOS, Windows, and Linux, then attaches all artifacts to a draft
+# GitHub Release.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:  # Allow manual runs from the Actions tab
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-build.txt
+      - name: Install create-dmg
+        run: brew install create-dmg
+      - name: Build
+        run: bash build_mac.sh
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: peanut-macos
+          path: dist/*.dmg
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-build.txt
+      - name: Build
+        run: build_windows.bat
+        shell: cmd
+      - name: Zip folder distribution
+        run: |
+          cd dist
+          7z a -tzip Peanut-windows.zip Peanut
+        shell: bash
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: peanut-windows
+          path: |
+            dist/Peanut-windows.zip
+            dist/*-windows-installer.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          # libfuse2 — required for AppImage runtime
+          # GTK + WebKit2 — required for pywebview's Linux backend
+          sudo apt-get install -y libfuse2 \
+            libgirepository1.0-dev libcairo2-dev pkg-config \
+            python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1 || \
+          sudo apt-get install -y libfuse2 \
+            libgirepository1.0-dev libcairo2-dev pkg-config \
+            python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.0
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-build.txt
+      - name: Install appimagetool
+        run: |
+          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
+          chmod +x /usr/local/bin/appimagetool
+      - name: Build
+        run: bash build_linux.sh
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: peanut-linux
+          path: |
+            dist/*.tar.gz
+            dist/*.AppImage
+
+  release:
+    needs: [build-mac, build-windows, build-linux]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: |
+            artifacts/peanut-macos/*
+            artifacts/peanut-windows/*
+            artifacts/peanut-linux/*
+          generate_release_notes: true

@@ -1,0 +1,6 @@
+# Build-time dependencies (in addition to requirements.txt).
+# Install BOTH before running build_mac.sh / build_windows.bat / build_linux.sh:
+#   pip install -r requirements.txt
+#   pip install -r requirements-build.txt
+
+pyinstaller>=6.0
