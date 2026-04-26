@@ -1,5 +1,7 @@
 # Peanut
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/cbrwe/peanut/blob/main/LICENSE)
+
 Content-aware duplicate finder. Scans actual file content using perceptual hashing for images, video keyframes for video, audio fingerprints for audio, and SimHash for text — to catch renamed, re-encoded, and resized copies. Review everything before you delete anything.
 
 ## Install
@@ -118,6 +120,12 @@ The author assumes no responsibility for data loss, accidental deletions, corrup
 By using Peanut, you accept that all decisions about which files to keep or remove are yours.
 
 See [LICENSE](LICENSE) for full terms.
+
+## License
+
+Peanut is released under the MIT License. You can use, modify, and distribute
+it freely, including for commercial purposes. See [LICENSE](LICENSE) for the
+full text.
 
 ## Author
 
