@@ -201,6 +201,12 @@ def main() -> None:
     # webview.start() blocks until the window closes. confirm_close=False
     # means closing the window quits immediately. When this returns,
     # server_thread (daemon) dies with the main thread.
+    # Force a clean exit when the user clicks the close button.
+    # Works around a macOS Tahoe + pywebview 6.2 quirk where the first
+    # close click only "pulses" the window instead of fully quitting.
+    # os._exit() bypasses any pywebview/macOS reload logic.
+    window.events.closing += lambda: os._exit(0)
+
     webview.start(debug=False)
 
 
@@ -208,6 +214,3 @@ if __name__ == "__main__":
     main()
 
 
-
-if __name__ == "__main__":
-    main()
