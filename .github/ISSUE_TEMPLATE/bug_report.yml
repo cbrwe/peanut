@@ -1,0 +1,58 @@
+name: Bug report
+description: Report something Peanut did wrong
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. The more specific you can be, the faster we can fix it.
+  - type: input
+    id: peanut-version
+    attributes:
+      label: Peanut version
+      description: Check the release tag, or look at Help / About
+      placeholder: v1.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - macOS
+        - Windows
+        - Linux
+    validations:
+      required: true
+  - type: input
+    id: os-version
+    attributes:
+      label: OS version
+      placeholder: "macOS 26 / Windows 11 / Ubuntu 24.04"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what actually happened?
+      placeholder: I scanned a folder of 1000 photos and...
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: If the bug is reproducible, walk us through it
+      placeholder: |
+        1. Open Peanut
+        2. Drag folder X onto the dropzone
+        3. Click Scan
+        4. Observe...
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log output (optional)
+      description: Look for peanut.log in your Application Support folder on macOS, AppData on Windows, or local share on Linux
+      render: shell
